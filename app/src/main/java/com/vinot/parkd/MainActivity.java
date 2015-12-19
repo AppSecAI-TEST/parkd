@@ -1,8 +1,11 @@
 package com.vinot.parkd;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -13,10 +16,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
+
     private HttpService mHttpService;
 
     @Override
@@ -38,7 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        bindService(new Intent(this, HttpService.class), mServiceConnection, BIND_AUTO_CREATE);
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            bindService(new Intent(this, HttpService.class), mServiceConnection, BIND_AUTO_CREATE);
+        } else {
+            Toast.makeText(MainActivity.this, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+        }
         super.onStart();
     }
 
