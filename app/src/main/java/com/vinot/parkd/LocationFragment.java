@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -35,8 +36,10 @@ public class LocationFragment extends Fragment {
 
     private final static String TAG = LocationFragment.class.getSimpleName();
 
+    private TextView mTextView;
+
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // the fragment initialisation parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -46,9 +49,7 @@ public class LocationFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public LocationFragment() {
-        // Required empty public constructor
-    }
+    public LocationFragment() { /*Required empty public constructor*/ }
 
     /**
      * Use this factory method to create a new instance of
@@ -78,9 +79,15 @@ public class LocationFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mTextView = (TextView) getActivity().findViewById(R.id.fragment_location_textview);
+        (new DownloadLocationTask()).execute(getString(R.string.url_location));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_location, container, false);
     }
 
@@ -142,9 +149,9 @@ public class LocationFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            // TODO update the fragment appropriately
-            super.onPostExecute(s);
+        protected void onPostExecute(String downloadedString) {
+            super.onPostExecute(downloadedString);
+            mTextView.setText(downloadedString);
         }
 
         private String downloadUrl(String url) throws NullPointerException {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -18,7 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -95,4 +96,13 @@ public class MainActivity extends AppCompatActivity {
             Log.wtf(TAG, "Unexpected disconnection from HttpService");
         }
     };
+
+    ///////////////
+    // Fragments //
+    ///////////////
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }
