@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Parkd</string>
     <string name="action_settings">Settings</string>
+    <string name="no_network_connection">Unable to connect to the internet</string>
+    <string name="url_location">http://www.google.com.au</string>
+    <string name="fragment_location_textview_default">Unpopulated location information</string>
 </resources>

@@ -27,6 +27,12 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".HttpService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>
