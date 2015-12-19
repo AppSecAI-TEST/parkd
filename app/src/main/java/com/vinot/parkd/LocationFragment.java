@@ -128,8 +128,8 @@ public class LocationFragment extends Fragment {
     /////////////////////////
 
     private class DownloadLocationTask extends AsyncTask<String, Void, String> {
-        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        private ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         @Override
         protected String doInBackground(String... urls) {
@@ -146,41 +146,41 @@ public class LocationFragment extends Fragment {
             // TODO update the fragment appropriately
             super.onPostExecute(s);
         }
-    }
 
-    private String downloadUrl(String url) throws NullPointerException {
-        InputStream is = null;
-        try {
-            HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
-
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-
-            Log.d(TAG, String.format("The respone from %s is %d", url, conn.getResponseCode()));
-            is = conn.getInputStream();
-
-            // todo perform JSON rather than String conversion here
-            return readIt(is);
-        } catch (MalformedURLException e) {
-            Log.wtf(TAG, e);
-        } catch (IOException e) {
-            Log.wtf(TAG, e);
-        } finally {
+        private String downloadUrl(String url) throws NullPointerException {
+            InputStream is = null;
             try {
-                if (is != null) is.close();
+                HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
+
+                conn.setReadTimeout(10000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+
+                Log.d(TAG, String.format("The respone from %s is %d", url, conn.getResponseCode()));
+                is = conn.getInputStream();
+
+                // todo perform JSON rather than String conversion here
+                return readIt(is);
+            } catch (MalformedURLException e) {
+                Log.wtf(TAG, e);
             } catch (IOException e) {
                 Log.wtf(TAG, e);
+            } finally {
+                try {
+                    if (is != null) is.close();
+                } catch (IOException e) {
+                    Log.wtf(TAG, e);
+                }
             }
+            return null;
         }
-        return null;
-    }
 
-    private String readIt(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
-        Reader reader = new InputStreamReader(inputStream, "UTF-8");
-        char[] buffer = new char[10];
-        reader.read(buffer);
-        return new String(buffer);
+        private String readIt(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
+            Reader reader = new InputStreamReader(inputStream, "UTF-8");
+            char[] buffer = new char[10];
+            reader.read(buffer);
+            return new String(buffer);
+        }
     }
 }
