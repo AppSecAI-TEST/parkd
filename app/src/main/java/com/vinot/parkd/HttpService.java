@@ -7,13 +7,15 @@ import android.os.IBinder;
 
 public class HttpService extends Service {
 
+    private final static String TAG = MainActivity.class.getSimpleName();
+
     IBinder mHttpServiceBinder = new HttpServiceBinder();
 
     public HttpService() {
     }
-
-    // binding
-
+    /////////////
+    // Binding //
+    /////////////
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
