@@ -13,18 +13,26 @@
     tools:showIn="@layout/activity_main"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/activity_main_textview"
-        android:text="Hello World!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <fragment
         android:id="@+id/fragment_location"
         android:name="com.vinot.parkd.LocationFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/activity_main_textview"
+        android:layout_above="@id/fragment_location"
         tools:layout="@layout/fragment_location" />
+
+    <ImageView
+        android:id="@+id/prompt_animation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/parkd_scanner"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/prompt_animation"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:text="@string/prompt_invitation"/>
 
 </RelativeLayout>
