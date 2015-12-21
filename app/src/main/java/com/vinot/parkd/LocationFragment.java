@@ -1,5 +1,6 @@
 package com.vinot.parkd;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,6 +38,7 @@ public class LocationFragment extends Fragment {
     private final static String TAG = LocationFragment.class.getSimpleName();
 
     private TextView mTextView;
+    private Activity mParentActivity;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialisation parameters, e.g. ARG_ITEM_NUMBER
@@ -82,7 +84,15 @@ public class LocationFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mTextView = (TextView) getActivity().findViewById(R.id.fragment_location_textview);
-        (new DownloadLocationTask()).execute(getString(R.string.url_location));
+        mParentActivity = getActivity();
+        ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            (new DownloadLocationTask()).execute(getString(R.string.url_location));
+        } else {
+            Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
