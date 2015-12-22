@@ -6,4 +6,7 @@
     <string name="fragment_location_textview_default">Unpopulated location information</string>
     <string name="prompt_invitation">place your phone over the\nprompt point and slide it down slowly\nwaiting for activation</string>
     <string name="nfc_information">NFC INFORMATION</string>
+
+    <string name="web_host">10.0.0.107</string>
+    <string name="web_pathPrefix">/locations/1.json</string>
 </resources>
