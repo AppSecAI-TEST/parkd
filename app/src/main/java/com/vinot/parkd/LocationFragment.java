@@ -2,12 +2,14 @@ package com.vinot.parkd;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +20,10 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,9 +36,9 @@ import java.net.URL;
 public class LocationFragment extends Fragment {
 
     private final static String TAG = LocationFragment.class.getSimpleName();
-
-    private TextView mTextView;
+    
     private Activity mParentActivity;
+    private Resources mResources;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialisation parameters, e.g. ARG_ITEM_NUMBER
@@ -74,6 +74,7 @@ public class LocationFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mResources = getResources();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -83,7 +84,6 @@ public class LocationFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mTextView = (TextView) getActivity().findViewById(R.id.fragment_location_textview);
         mParentActivity = getActivity();
         ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -143,12 +143,12 @@ public class LocationFragment extends Fragment {
     // Network Interaction //
     /////////////////////////
 
-    private class DownloadLocationTask extends AsyncTask<String, Void, String> {
+    private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
         private ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         @Override
-        protected String doInBackground(String... urls) {
+        protected Location doInBackground(String... urls) {
             if (networkInfo != null && networkInfo.isConnected()) {
                 return downloadUrl(urls[0]);
             } else {
@@ -158,12 +158,24 @@ public class LocationFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String downloadedString) {
-            super.onPostExecute(downloadedString);
-            mTextView.setText(downloadedString);
+        protected void onPostExecute(Location downloadedLocation) {
+            super.onPostExecute(downloadedLocation);
+            TextView t;
+            try {
+                t = (TextView) getActivity().findViewById(R.id.fragment_location_id_textview);
+                t.setText(
+                        String.format(mResources.getString(R.string.fragment_location_textview_id), downloadedLocation.getId())
+                );
+                t = (TextView) getActivity().findViewById(R.id.fragment_location_name_textview);
+                t.setText(
+                        String.format(mResources.getString(R.string.fragment_location_textview_name), downloadedLocation.getName())
+                );
+            } catch (NullPointerException e) {
+                Log.wtf(TAG, e);
+            }
         }
 
-        private String downloadUrl(String url) throws NullPointerException {
+        private Location downloadUrl(String url) throws NullPointerException {
             InputStream is = null;
             try {
                 HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
@@ -176,8 +188,7 @@ public class LocationFragment extends Fragment {
                 Log.d(TAG, String.format("The respone from %s is %d", url, conn.getResponseCode()));
                 is = conn.getInputStream();
 
-                // todo perform JSON rather than String conversion here
-                return readIt(is);
+                return readLocation(is);
             } catch (MalformedURLException e) {
                 Log.wtf(TAG, e);
             } catch (IOException e) {
@@ -192,11 +203,37 @@ public class LocationFragment extends Fragment {
             return null;
         }
 
-        private String readIt(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
+        private Location readLocation(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
+            Location.Builder b = new Location.Builder();
+            JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+            try {
+                jsonReader.beginObject();
+                while (jsonReader.hasNext()) {
+                    switch(jsonReader.nextName()) {
+                        case "id":
+                            b.setId(jsonReader.nextInt());
+                            break;
+                        case "name":
+                            b.setName(jsonReader.nextName());
+                            break;
+                        default:
+                            jsonReader.skipValue();
+                            break;
+                    }
+                }
+                return b.build();
+            } finally {
+                jsonReader.close();
+            }
+            /*
             Reader reader = new InputStreamReader(inputStream, "UTF-8");
-            char[] buffer = new char[10];
-            reader.read(buffer);
-            return new String(buffer);
+            try {
+                char[] buffer = new char[10];
+                reader.read(buffer);
+                return new String(buffer);
+            } finally {
+                reader.close();
+            }*/
         }
     }
 }

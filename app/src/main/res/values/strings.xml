@@ -9,4 +9,6 @@
 
     <string name="web_host">10.0.0.107</string>
     <string name="web_pathPrefix">/locations/1.json</string>
+    <string name="fragment_location_textview_id">ID: %1$d</string>
+    <string name="fragment_location_textview_name">NAME: %1$s</string>
 </resources>
