@@ -92,7 +92,6 @@ public class LocationFragment extends Fragment {
         } else {
             Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
