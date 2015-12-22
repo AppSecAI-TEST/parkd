@@ -15,10 +15,11 @@
     tools:showIn="@layout/activity_nfc"
     tools:context=".NfcActivity">
 
-    <TextView
-        android:layout_width="match_parent"
+    <fragment
+        android:id="@+id/fragment_location"
+        android:name="com.vinot.parkd.LocationFragment"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:text="@string/nfc_information"/>
+        tools:layout="@layout/fragment_location" />
 
 </LinearLayout>

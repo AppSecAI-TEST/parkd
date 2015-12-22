@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -85,12 +85,4 @@ public class MainActivity extends AppCompatActivity implements LocationFragment.
         }
     };
 
-    ///////////////
-    // Fragments //
-    ///////////////
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
 }

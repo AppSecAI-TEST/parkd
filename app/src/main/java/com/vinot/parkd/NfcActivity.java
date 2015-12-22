@@ -1,6 +1,7 @@
 package com.vinot.parkd;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.Parcelable;
@@ -8,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
-public class NfcActivity extends AppCompatActivity {
+public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener {
 
     private static final String TAG = NfcActivity.class.getSimpleName();
 
@@ -35,5 +36,13 @@ public class NfcActivity extends AppCompatActivity {
         }
     }
 
+    ///////////////
+    // Fragments //
+    ///////////////
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 
 }
