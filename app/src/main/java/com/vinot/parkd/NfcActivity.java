@@ -8,6 +8,8 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener {
 
@@ -30,6 +32,15 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
                 mSingleMessage = true;
             }
         }
+
+        final Button b = (Button) findViewById(R.id.button_maps_activity);
+        b.setText(MapsActivity.class.getSimpleName());
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(NfcActivity.this, MapsActivity.class));
+            }
+        });
     }
 
     @Override

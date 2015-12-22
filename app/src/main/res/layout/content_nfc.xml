@@ -22,4 +22,9 @@
         android:layout_height="wrap_content"
         tools:layout="@layout/fragment_location" />
 
+    <Button
+        android:id="@+id/button_maps_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
