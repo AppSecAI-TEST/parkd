@@ -12,33 +12,13 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    tools:showIn="@layout/activity_main"
-    tools:context=".MainActivity">
-
-    <fragment
-        android:id="@+id/fragment_location"
-        android:name="com.vinot.parkd.LocationFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:layout="@layout/fragment_location" />
-
-    <ImageView
-        android:id="@+id/prompt_animation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxHeight="350dp"
-        android:adjustViewBounds="true"
-        android:src="@drawable/parkd_scanner"/>
+    tools:showIn="@layout/activity_nfc"
+    tools:context=".NfcActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="center"
-        android:text="@string/prompt_invitation"/>
-
-    <Button
-        android:id="@+id/button_nfc_activity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:text="@string/nfc_information"/>
 
 </LinearLayout>
