@@ -88,7 +88,8 @@ public class LocationFragment extends Fragment {
         ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            (new DownloadLocationTask()).execute(getString(R.string.url_location));
+            // todo get the URL from the tag
+            (new DownloadLocationTask()).execute("http://" + getString(R.string.web_host) + getString(R.string.web_pathPrefix));
         } else {
             Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
         }
@@ -214,13 +215,14 @@ public class LocationFragment extends Fragment {
                             b.setId(jsonReader.nextInt());
                             break;
                         case "name":
-                            b.setName(jsonReader.nextName());
+                            b.setName(jsonReader.nextString());
                             break;
                         default:
                             jsonReader.skipValue();
                             break;
                     }
                 }
+                jsonReader.endObject();
                 return b.build();
             } finally {
                 jsonReader.close();
