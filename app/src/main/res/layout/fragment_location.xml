@@ -21,6 +21,4 @@
             android:text="@string/fragment_location_textview_default" />
     </LinearLayout>
 
-
-
 </FrameLayout>

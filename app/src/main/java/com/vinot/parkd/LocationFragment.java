@@ -88,8 +88,10 @@ public class LocationFragment extends Fragment {
         ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            // todo get the URL from the tag
-            (new DownloadLocationTask()).execute("http://" + getString(R.string.web_host) + getString(R.string.web_pathPrefix));
+            if (mParentActivity instanceof NfcActivity && ((NfcActivity) mParentActivity).isNfcInitialised()) {
+                // todo get rid of the "toString" conversion here by modifying the AsyncTask's parameters.
+                (new DownloadLocationTask()).execute(((NfcActivity) mParentActivity).getLocationUri().toString());
+            }
         } else {
             Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
         }
@@ -138,6 +140,7 @@ public class LocationFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+        boolean isNfcInitialised();
     }
 
     /////////////////////////
@@ -145,7 +148,7 @@ public class LocationFragment extends Fragment {
     /////////////////////////
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
-        private ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        private ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
         private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         @Override
@@ -153,7 +156,7 @@ public class LocationFragment extends Fragment {
             if (networkInfo != null && networkInfo.isConnected()) {
                 return downloadUrl(urls[0]);
             } else {
-                Toast.makeText(getActivity(), getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -163,11 +166,11 @@ public class LocationFragment extends Fragment {
             super.onPostExecute(downloadedLocation);
             TextView t;
             try {
-                t = (TextView) getActivity().findViewById(R.id.fragment_location_id_textview);
+                t = (TextView) mParentActivity.findViewById(R.id.fragment_location_id_textview);
                 t.setText(
                         String.format(mResources.getString(R.string.fragment_location_textview_id), downloadedLocation.getId())
                 );
-                t = (TextView) getActivity().findViewById(R.id.fragment_location_name_textview);
+                t = (TextView) mParentActivity.findViewById(R.id.fragment_location_name_textview);
                 t.setText(
                         String.format(mResources.getString(R.string.fragment_location_textview_name), downloadedLocation.getName())
                 );
@@ -227,15 +230,6 @@ public class LocationFragment extends Fragment {
             } finally {
                 jsonReader.close();
             }
-            /*
-            Reader reader = new InputStreamReader(inputStream, "UTF-8");
-            try {
-                char[] buffer = new char[10];
-                reader.read(buffer);
-                return new String(buffer);
-            } finally {
-                reader.close();
-            }*/
         }
     }
 }
