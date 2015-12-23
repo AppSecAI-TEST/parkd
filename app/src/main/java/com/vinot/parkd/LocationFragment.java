@@ -153,12 +153,7 @@ public class LocationFragment extends Fragment {
 
         @Override
         protected Location doInBackground(String... urls) {
-            if (networkInfo != null && networkInfo.isConnected()) {
-                return downloadUrl(urls[0]);
-            } else {
-                Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
-            }
-            return null;
+            return downloadUrl(urls[0]);
         }
 
         @Override
@@ -173,6 +168,12 @@ public class LocationFragment extends Fragment {
                 t = (TextView) mParentActivity.findViewById(R.id.fragment_location_name_textview);
                 t.setText(
                         String.format(mResources.getString(R.string.fragment_location_textview_name), downloadedLocation.getName())
+                );
+                Log.d(TAG,
+                        String.format(
+                                "ID: %d NAME: %s LAT: %10.7f LON: %10.7f",
+                                downloadedLocation.getId(), downloadedLocation.getName(),
+                                downloadedLocation.getLatitude(), downloadedLocation.getLongitude())
                 );
             } catch (NullPointerException e) {
                 Log.wtf(TAG, e);
@@ -219,6 +220,12 @@ public class LocationFragment extends Fragment {
                             break;
                         case "name":
                             b.setName(jsonReader.nextString());
+                            break;
+                        case "latitude":
+                            b.setLatitude(jsonReader.nextDouble());
+                            break;
+                        case "longitude":
+                            b.setLongitude(jsonReader.nextDouble());
                             break;
                         default:
                             jsonReader.skipValue();

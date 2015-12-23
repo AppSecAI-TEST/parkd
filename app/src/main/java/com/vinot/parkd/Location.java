@@ -3,18 +3,24 @@ package com.vinot.parkd;
 public class Location {
     private int mId;
     private String mName;
+    private double mLatitude, mLongitude;
 
-    public Location(int id, String name) {
+    public Location(int id, String name, double latitude, double longitude) {
         this.mId = id;
         this.mName = name;
+        this.mLatitude = latitude;
+        this.mLongitude = longitude;
     }
     private Location(Builder builder) {
         this.mId = builder.mId;
         this.mName = builder.mName;
+        this.mLatitude = builder.mLatitude;
+        this.mLongitude = builder.mLongitude;
     }
 
     public static class Builder {
         private int mId = -1;
+        private double mLatitude, mLongitude;
         private String mName = null;
         public Location.Builder setId(int id) {
             mId = id;
@@ -22,6 +28,14 @@ public class Location {
         }
         public Location.Builder setName(String name) {
             mName = name;
+            return Location.Builder.this;
+        }
+        public Location.Builder setLatitude(double latitude) {
+            mLatitude = latitude;
+            return Location.Builder.this;
+        }
+        public Location.Builder setLongitude(double longitude) {
+            mLongitude = longitude;
             return Location.Builder.this;
         }
         public Location build() { return new Location(Builder.this); }
@@ -32,4 +46,6 @@ public class Location {
     /////////////
     public int getId() { return mId; }
     public String getName() { return mName; }
+    public double getLatitude() { return mLatitude; }
+    public double getLongitude() { return mLongitude; }
 }

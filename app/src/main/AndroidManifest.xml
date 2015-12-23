@@ -50,7 +50,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:host="@string/web_host"
-                    android:pathPrefix="@string/web_pathPrefix"
                     android:port="3000"
                     android:scheme="http" />
             </intent-filter>
