@@ -8,8 +8,6 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,10 +18,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener, OnMapReadyCallback {
 
+    private static final float ZOOM_LEVEL = 19f;
     private static final String TAG = NfcActivity.class.getSimpleName();
     private Intent mIntent = null;
     private NdefMessage mMessages[] = null;
-    private GoogleMap mMap;
+    private GoogleMap mMap = null;
     //private byte[] mTagId = null;
     private boolean mSingleMessage = false;
 
@@ -95,15 +94,39 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setIndoorEnabled(false);
+        // If Location loaded in LocationFragment, load that.
+        Location location;
+        LocationFragment locationFragment = (LocationFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_location);
+        if (locationFragment != null) {
+            location = locationFragment.getLocation();
+            if (location != null) {
+                updateMap(location);
+            }
+        }
+    }
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    /**
+     * Called to update the map to focus on the Location provided as an argument, and place a
+     * marker there.  In general this method will be called in the following cases:
+     * 1. From a LocationFragment once it has obtained a Location from a tag *and* checked that
+     *    NfcActivity.this.mMap is non-null (i.e. the GoogleMap is ready to be manipulated)
+     * 2. From NfcActivity, after checking that a Location is available from the LocationFragment.
+     *    Whatever location is returned from the LocationFragment, whether it is fresh from a Tag
+     *    or has been stored there for a while, will be placed on the map in the MapFragment.
+     *
+     * The method will likely need a lot of work, it is admittedly the result of somewhat of a hack-
+     * job.
+     * @param location the location for the map to focus on.
+     */
+    public void updateMap(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(latLng).title(location.getName()));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL));
 
     }
 
-    // this is very dependent on how the tag is laid out and if not the correct way to interact with
+    // this is very dependent on how the tag is laid out and is not the correct way to interact with
     // fragments. Needs to be refactored.
     public Uri getLocationUri() {
         if (mSingleMessage && mMessages != null) {
@@ -112,5 +135,5 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
         return null;
     }
 
-
+    public boolean isMapLoaded() { return mMap != null; }
 }

@@ -39,6 +39,7 @@ public class LocationFragment extends Fragment {
     
     private Activity mParentActivity;
     private Resources mResources;
+    private Location mLocation = null;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialisation parameters, e.g. ARG_ITEM_NUMBER
@@ -143,6 +144,8 @@ public class LocationFragment extends Fragment {
         boolean isNfcInitialised();
     }
 
+    public Location getLocation() { return mLocation; }
+
     /////////////////////////
     // Network Interaction //
     /////////////////////////
@@ -169,12 +172,13 @@ public class LocationFragment extends Fragment {
                 t.setText(
                         String.format(mResources.getString(R.string.fragment_location_textview_name), downloadedLocation.getName())
                 );
-                Log.d(TAG,
-                        String.format(
-                                "ID: %d NAME: %s LAT: %10.7f LON: %10.7f",
-                                downloadedLocation.getId(), downloadedLocation.getName(),
-                                downloadedLocation.getLatitude(), downloadedLocation.getLongitude())
-                );
+                mLocation = downloadedLocation;
+                if (mParentActivity instanceof NfcActivity){
+                    NfcActivity parent = (NfcActivity) mParentActivity;
+                    if (parent.isMapLoaded()) {
+                        parent.updateMap(mLocation);
+                    }
+                }
             } catch (NullPointerException e) {
                 Log.wtf(TAG, e);
             }
