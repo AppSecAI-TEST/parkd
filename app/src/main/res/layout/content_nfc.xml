@@ -16,15 +16,16 @@
     tools:context=".NfcActivity">
 
     <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+    <fragment
         android:id="@+id/fragment_location"
         android:name="com.vinot.parkd.LocationFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:layout="@layout/fragment_location" />
-
-    <Button
-        android:id="@+id/button_maps_activity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
 </LinearLayout>

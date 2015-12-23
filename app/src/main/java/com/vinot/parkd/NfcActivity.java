@@ -11,12 +11,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener, OnMapReadyCallback {
 
     private static final String TAG = NfcActivity.class.getSimpleName();
     private Intent mIntent = null;
     private NdefMessage mMessages[] = null;
-    private byte[] mTagId = null;
+    private GoogleMap mMap;
+    //private byte[] mTagId = null;
     private boolean mSingleMessage = false;
 
     @Override
@@ -27,20 +35,15 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(mIntent.getAction())) {
             Log.d(TAG, "Tag detected");
             mMessages = produceNdefMessages(mIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
-            mTagId = mIntent.getByteArrayExtra(NfcAdapter.EXTRA_ID); // todo use this instead of *any* identifying NDEF record
+            //mTagId = mIntent.getByteArrayExtra(NfcAdapter.EXTRA_ID); // todo use this instead of *any* identifying NDEF record
             if (mMessages.length == 1) {
                 mSingleMessage = true;
             }
         }
 
-        final Button b = (Button) findViewById(R.id.button_maps_activity);
-        b.setText(MapsActivity.class.getSimpleName());
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(NfcActivity.this, MapsActivity.class));
-            }
-        });
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -80,6 +83,26 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
         return NfcAdapter.ACTION_NDEF_DISCOVERED.equals(mIntent.getAction());
     }
 
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+    }
+
     // this is very dependent on how the tag is laid out and if not the correct way to interact with
     // fragments. Needs to be refactored.
     public Uri getLocationUri() {
@@ -88,4 +111,6 @@ public class NfcActivity extends AppCompatActivity implements LocationFragment.O
         }
         return null;
     }
+
+
 }
