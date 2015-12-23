@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class NfcActivity extends AppCompatActivity implements LocationFragment.OnFragmentInteractionListener, OnMapReadyCallback {
 
-    private static final float ZOOM_LEVEL = 19f;
+    private static final float ZOOM_LEVEL = 15f;
     private static final String TAG = NfcActivity.class.getSimpleName();
     private Intent mIntent = null;
     private NdefMessage mMessages[] = null;

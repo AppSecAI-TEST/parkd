@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -162,19 +163,13 @@ public class LocationFragment extends Fragment {
         @Override
         protected void onPostExecute(Location downloadedLocation) {
             super.onPostExecute(downloadedLocation);
-            TextView t;
+            mLocation = downloadedLocation;
             try {
-                t = (TextView) mParentActivity.findViewById(R.id.fragment_location_id_textview);
-                t.setText(
-                        String.format(mResources.getString(R.string.fragment_location_textview_id), downloadedLocation.getId())
-                );
-                t = (TextView) mParentActivity.findViewById(R.id.fragment_location_name_textview);
-                t.setText(
-                        String.format(mResources.getString(R.string.fragment_location_textview_name), downloadedLocation.getName())
-                );
-                mLocation = downloadedLocation;
                 if (mParentActivity instanceof NfcActivity){
                     NfcActivity parent = (NfcActivity) mParentActivity;
+                    parent.setTitle(mLocation.getName());
+                    Button b = (Button) parent.findViewById(R.id.button_payment);
+                    b.setText(String.format(getString(R.string.fragment_location_button_payment), 1f));
                     if (parent.isMapLoaded()) {
                         parent.updateMap(mLocation);
                     }

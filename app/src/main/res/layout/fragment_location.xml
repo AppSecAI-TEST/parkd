@@ -4,21 +4,4 @@
     android:layout_height="match_parent"
     tools:context="com.vinot.parkd.LocationFragment">
 
-    <LinearLayout
-        android:id="@+id/fragment_location_linearlayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/fragment_location_id_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/fragment_location_textview_default" />
-        <TextView
-            android:id="@+id/fragment_location_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/fragment_location_textview_default" />
-    </LinearLayout>
-
 </FrameLayout>
