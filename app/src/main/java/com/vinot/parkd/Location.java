@@ -1,9 +1,15 @@
 package com.vinot.parkd;
 
 public class Location {
-    private int mId;
-    private String mName;
+
+    private int mId = -1;
+    private String mName = "Default Location";
     private double mLatitude, mLongitude;
+
+    public Location(android.location.Location location) {
+        this.mLatitude = location.getLatitude();
+        this.mLongitude = location.getLongitude();
+    }
 
     public Location(int id, String name, double latitude, double longitude) {
         this.mId = id;
