@@ -38,7 +38,8 @@ public class SplashScreenActivity extends AppCompatActivity {
                     SPLASH_TIME_OUT
             );
         } else {
-            // Code involving connecting to a network, or something more intensive that is not just based on a timer.
+            // Code involving connecting to a network, or something more intensive that is
+            // not just based on a timer.
         }
     }
 }

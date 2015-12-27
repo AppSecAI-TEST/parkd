@@ -1,6 +1,5 @@
 package com.vinot.parkd;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -15,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -37,10 +35,10 @@ import java.net.URL;
 public class LocationFragment extends Fragment {
 
     private final static String TAG = LocationFragment.class.getSimpleName();
-    
-    private Activity mParentActivity;
+
     private Resources mResources;
     private Location mLocation = null;
+    private OnFragmentInteractionListener mListener;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialisation parameters, e.g. ARG_ITEM_NUMBER
@@ -50,8 +48,6 @@ public class LocationFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
 
     public LocationFragment() { /*Required empty public constructor*/ }
 
@@ -86,16 +82,15 @@ public class LocationFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mParentActivity = getActivity();
-        ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            if (mParentActivity instanceof NfcActivity && ((NfcActivity) mParentActivity).isNfcInitialised()) {
+            if (mListener instanceof NfcActivity && mListener.isNfcInitialised()) {
                 // todo get rid of the "toString" conversion here by modifying the AsyncTask's parameters.
-                (new DownloadLocationTask()).execute(((NfcActivity) mParentActivity).getLocationUri().toString());
+                (new DownloadLocationTask()).execute(((NfcActivity) mListener).getLocationUri().toString());
             }
         } else {
-            Toast.makeText(mParentActivity, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+            Toast.makeText((NfcActivity) mListener, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -152,7 +147,7 @@ public class LocationFragment extends Fragment {
     /////////////////////////
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
-        private ConnectivityManager connMgr = (ConnectivityManager) mParentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        private ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         @Override
@@ -165,8 +160,8 @@ public class LocationFragment extends Fragment {
             super.onPostExecute(downloadedLocation);
             mLocation = downloadedLocation;
             try {
-                if (mParentActivity instanceof NfcActivity){
-                    NfcActivity parent = (NfcActivity) mParentActivity;
+                if (mListener instanceof NfcActivity){
+                    NfcActivity parent = (NfcActivity) mListener;
                     parent.setTitle(mLocation.getName());
                     Button b = (Button) parent.findViewById(R.id.button_payment);
                     b.setText(String.format(getString(R.string.fragment_location_button_payment), 1f));

@@ -11,8 +11,7 @@ public class HttpService extends Service {
 
     IBinder mHttpServiceBinder = new HttpServiceBinder();
 
-    public HttpService() {
-    }
+    public HttpService() { }
     /////////////
     // Binding //
     /////////////
