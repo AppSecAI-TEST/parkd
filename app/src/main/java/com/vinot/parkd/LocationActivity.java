@@ -11,7 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,6 +55,16 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
             }
         }
+
+        NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
+        numberPicker.setMaxValue(10); // todo obtain this from the Location object
+        numberPicker.setMinValue(1); // todo obtain this from the Location object
+        numberPicker.setFormatter(new NumberPicker.Formatter() {
+            @Override
+            public String format(int value) {
+                return String.format("%02d", value);
+            }
+        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -126,8 +139,19 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             LocationActivity.this.mLocation = downloadedLocation;
             try {
                 LocationActivity.this.setTitle(mLocation.getName());
+
                 Button b = (Button) findViewById(R.id.button_payment);
                 b.setText(String.format(getString(R.string.fragment_location_button_payment), mLocation.getCurrentPrice()));
+
+                findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
+
+                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
+                numberPicker.setMaxValue(10); // todo obtain this from the Location object
+                numberPicker.setMinValue(1); // todo obtain this from the Location object
+
+                TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
+                timePicker.setIs24HourView(true);
+
                 if (LocationActivity.this.mMap != null) {
                     LocationActivity.this.updateMap(mMap, mLocation);
                 }
