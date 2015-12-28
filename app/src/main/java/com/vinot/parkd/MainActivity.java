@@ -1,13 +1,9 @@
 package com.vinot.parkd;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,12 +20,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final Button b = (Button) findViewById(R.id.button_nfc_activity);
-        b.setText(NfcActivity.class.getSimpleName());
+        final Button b = (Button) findViewById(R.id.button_launch_activity);
+        b.setText(LocationActivity.class.getSimpleName());
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, NfcActivity.class));
+                startActivity(new Intent(MainActivity.this, LocationActivity.class));
             }
         });
 
@@ -62,26 +58,4 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    // binding
-    private boolean mBound = false;
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (service instanceof HttpService.HttpServiceBinder) {
-                HttpService mHttpService = ((HttpService.HttpServiceBinder) service).getBoundService();
-                Log.d(TAG, "Successfully bound to HttpService");
-                mBound = true;
-            } else {
-                Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of HttpService.HttpServiceBinder"));
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mBound = false;
-            Log.wtf(TAG, "Unexpected disconnection from HttpService");
-        }
-    };
-
 }

@@ -5,12 +5,12 @@ public class Location {
     private int mId = -1;
     private String mName = "Default Location";
     private double mLatitude, mLongitude;
+    private float mCurrentPrice = 1f; // todo logic to set the current price
 
     public Location(android.location.Location location) {
         this.mLatitude = location.getLatitude();
         this.mLongitude = location.getLongitude();
     }
-
     public Location(int id, String name, double latitude, double longitude) {
         this.mId = id;
         this.mName = name;
@@ -47,11 +47,9 @@ public class Location {
         public Location build() { return new Location(Builder.this); }
     }
 
-    /////////////
-    // Getters //
-    /////////////
     public int getId() { return mId; }
     public String getName() { return mName; }
     public double getLatitude() { return mLatitude; }
     public double getLongitude() { return mLongitude; }
+    public float getCurrentPrice() { return mCurrentPrice; }
 }

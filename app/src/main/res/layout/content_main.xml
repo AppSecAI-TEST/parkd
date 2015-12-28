@@ -30,7 +30,7 @@
         android:text="@string/prompt_invitation"/>
 
     <Button
-        android:id="@+id/button_nfc_activity"
+        android:id="@+id/button_launch_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
