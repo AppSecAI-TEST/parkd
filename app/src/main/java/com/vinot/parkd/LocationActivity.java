@@ -154,8 +154,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 b.setText(String.format(getString(R.string.button_payment), 0f));
 
                 NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-                numberPicker.setMaxValue(10); // todo obtain this from the Location object
-                numberPicker.setMinValue(1); // todo obtain this from the Location object
+                numberPicker.setMaxValue(mLocation.getNumberOfParks());
+                numberPicker.setMinValue(1);
 
                 TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
                 timePicker.setIs24HourView(true);

@@ -6,25 +6,14 @@ public class Location {
     private final static String DEFAULT_STATE = "Default State";
     private final static int DEFAULT_POSTCODE = 9999;
     private final static int DEFAULT_ID = -1;
+    private final static int DEFAULT_NUMBER_OF_PARKS = 5;
     private final static float DEFAULT_PRICE = 4f;
 
-    private int mId, mPostcode;
+    private int mId, mPostcode, mNumberOfParks;
     private String mName, mSuburb, mState;
     private double mLatitude, mLongitude;
     private float mCurrentPrice;
 
-    /*
-    public Location(android.location.Location location) {
-        this.mLatitude = location.getLatitude();
-        this.mLongitude = location.getLongitude();
-    }
-    public Location(int id, String name, double latitude, double longitude) {
-        this.mId = id;
-        this.mName = name;
-        this.mLatitude = latitude;
-        this.mLongitude = longitude;
-    }
-    */
     private Location(Builder builder) {
         this.mId = builder.mId;
         this.mName = builder.mName;
@@ -34,11 +23,13 @@ public class Location {
         this.mLatitude = builder.mLatitude;
         this.mLongitude = builder.mLongitude;
         this.mCurrentPrice = builder.mCurrentPrice;
+        this.mNumberOfParks = builder.mNumberOfParks;
     }
 
     public static class Builder {
         private int mId = DEFAULT_ID;
         private int mPostcode = DEFAULT_POSTCODE;
+        private int mNumberOfParks = DEFAULT_NUMBER_OF_PARKS;
         private String mName = DEFAULT_LOCATION;
         private String mSuburb = DEFAULT_SUBURB;
         private String mState = DEFAULT_STATE;
@@ -76,10 +67,15 @@ public class Location {
             mCurrentPrice = currentPrice;
             return Location.Builder.this;
         }
+        public Location.Builder setNumberOfParks(int numberOfParks) {
+            mNumberOfParks = numberOfParks;
+            return Location.Builder.this;
+        }
         public Location build() { return new Location(Builder.this); }
     }
 
     public int getId() { return mId; }
+    public int getNumberOfParks() { return mNumberOfParks; }
     public String getName() { return mName; }
     public String getSuburb() { return mSuburb; }
     public String getState() { return mState; }
