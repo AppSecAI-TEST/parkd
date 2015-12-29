@@ -138,12 +138,15 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             super.onPostExecute(downloadedLocation);
             LocationActivity.this.mLocation = downloadedLocation;
             try {
-                LocationActivity.this.setTitle(mLocation.getName());
-
-                Button b = (Button) findViewById(R.id.button_payment);
-                b.setText(String.format(getString(R.string.fragment_location_button_payment), mLocation.getCurrentPrice()));
+                LocationActivity.this.setTitle(String.format(
+                        getString(R.string.activity_location_title),
+                        mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
+                );
 
                 findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
+
+                Button b = (Button) findViewById(R.id.button_payment);
+                b.setText(String.format(getString(R.string.button_payment), mLocation.getCurrentPrice()));
 
                 NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
                 numberPicker.setMaxValue(10); // todo obtain this from the Location object
