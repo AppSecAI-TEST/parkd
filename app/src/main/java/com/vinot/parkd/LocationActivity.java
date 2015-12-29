@@ -21,6 +21,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -49,7 +50,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             Log.d(TAG, "Tag detected");
             NdefMessage messages[] = produceNdefMessages(getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
             //mTagId = mIntent.getByteArrayExtra(NfcAdapter.EXTRA_ID); // todo use this instead of *any* identifying NDEF record
-            if ( messages != null && messages.length == 1 ) {
+            if (messages != null && messages.length == 1) {
                 (new DownloadLocationTask()).execute(messages[0].getRecords()[0].toUri().toString());
             } else {
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
@@ -91,7 +92,11 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void updateMap(GoogleMap googleMap, Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        googleMap.addMarker(new MarkerOptions().position(latLng).title(location.getName()));
+        googleMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title(String.format(getString(R.string.activity_location_marker_text), 2, location.getCurrentPrice()))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+        );
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL));
     }
 
@@ -139,14 +144,14 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             LocationActivity.this.mLocation = downloadedLocation;
             try {
                 LocationActivity.this.setTitle(String.format(
-                        getString(R.string.activity_location_title),
-                        mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
+                                getString(R.string.activity_location_title),
+                                mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
                 );
 
                 findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
 
-                Button b = (Button) findViewById(R.id.button_payment);
-                b.setText(String.format(getString(R.string.button_payment), mLocation.getCurrentPrice()));
+                final Button b = (Button) findViewById(R.id.button_payment);
+                b.setText(String.format(getString(R.string.button_payment), 0f));
 
                 NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
                 numberPicker.setMaxValue(10); // todo obtain this from the Location object
@@ -154,6 +159,15 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
 
                 TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
                 timePicker.setIs24HourView(true);
+                timePicker.setHour(0);
+                timePicker.setMinute(0);
+                timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+                    @Override
+                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                        float price = hourOfDay * mLocation.getCurrentPrice() + (minute/60f) * mLocation.getCurrentPrice();
+                        b.setText(String.format(getString(R.string.button_payment), price));
+                    }
+                });
 
                 if (LocationActivity.this.mMap != null) {
                     LocationActivity.this.updateMap(mMap, mLocation);

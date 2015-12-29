@@ -6,7 +6,7 @@ public class Location {
     private final static String DEFAULT_STATE = "Default State";
     private final static int DEFAULT_POSTCODE = 9999;
     private final static int DEFAULT_ID = -1;
-    private final static float DEFAULT_PRICE = 1f;
+    private final static float DEFAULT_PRICE = 4f;
 
     private int mId, mPostcode;
     private String mName, mSuburb, mState;

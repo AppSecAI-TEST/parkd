@@ -10,6 +10,8 @@
     <string name="fragment_location_textview_id">ID: %1$d</string>
     <string name="fragment_location_textview_name">NAME: %1$s</string>
     <string name="button_payment">pay now total $%1$.2f</string>
-    <string name="label_park_number">Park #</string>
+    <string name="button_code">CODE</string>
+    <string name="label_park_number">PARK #</string>
     <string name="activity_location_title">%1$s, %2$s\n%3$s, %4$4d</string>
+    <string name="activity_location_marker_text">%1$dP $%2$.2fp/h</string>
 </resources>
