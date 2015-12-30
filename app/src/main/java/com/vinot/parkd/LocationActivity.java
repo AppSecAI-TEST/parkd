@@ -1,6 +1,7 @@
 package com.vinot.parkd;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -34,6 +35,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class LocationActivity extends AppCompatActivity implements OnMapReadyCallback {
+    public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
+    public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
+    public static final String ACTION_PAYMENT = LocationActivity.class.getCanonicalName() + ".ACTION_PAYMENT";
+
     private static final String TAG = LocationActivity.class.getSimpleName();
     private static final float ZOOM_LEVEL = 15f;
 
@@ -151,23 +156,35 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
 
                 final Button b = (Button) findViewById(R.id.button_payment);
+                final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
                 b.setText(String.format(getString(R.string.button_payment), 0f));
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int hourOfDay = timePicker.getHour();
+                        int minute = timePicker.getMinute();
+                        Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
+                        paymentActivityIntent.setAction(ACTION_PAYMENT);
+                        paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
+                        paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                        startActivity(paymentActivityIntent);
+                    }
+                });
 
-                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-                numberPicker.setMaxValue(mLocation.getNumberOfParks());
-                numberPicker.setMinValue(1);
-
-                TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
                 timePicker.setIs24HourView(true);
                 timePicker.setHour(0);
                 timePicker.setMinute(0); // todo set max time based on a Location property
                 timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                     @Override
                     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        float price = hourOfDay * mLocation.getCurrentPrice() + (minute/60f) * mLocation.getCurrentPrice();
+                        float price = hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice();
                         b.setText(String.format(getString(R.string.button_payment), price));
                     }
                 });
+
+                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
+                numberPicker.setMaxValue(mLocation.getNumberOfParks());
+                numberPicker.setMinValue(1);
 
                 if (LocationActivity.this.mMap != null) {
                     LocationActivity.this.updateMap(mMap, mLocation);
