@@ -1,6 +1,13 @@
 package com.vinot.parkd;
 
-public class Location {
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
+public class Location implements Parcelable {
+    public static final String TAG = Location.class.getSimpleName();
+
     private final static String DEFAULT_LOCATION = "Default Location";
     private final static String DEFAULT_SUBURB = "Default Suburb";
     private final static String DEFAULT_STATE = "Default State";
@@ -83,4 +90,58 @@ public class Location {
     public double getLatitude() { return mLatitude; }
     public double getLongitude() { return mLongitude; }
     public float getCurrentPrice() { return mCurrentPrice; }
+
+    // Parcelable
+
+    private static final String KEY_INTS = Location.class.getCanonicalName() + ".KEY_INTS";
+    private static final String KEY_STRINGS = Location.class.getCanonicalName() + ".KEY_STRINGS";
+    private static final String KEY_DOUBLES = Location.class.getCanonicalName() + ".KEY_DOUBLES";
+    private static final String KEY_FLOAT = Location.class.getCanonicalName() + ".KEY_FLOAT";
+
+    public static final Parcelable.Creator<Location> CREATOR = new Parcelable.Creator<Location>() {
+        @Override
+        public Location createFromParcel(Parcel source) {
+            try {
+                Bundle bundle = source.readBundle();
+                int ints[] = bundle.getIntArray(KEY_INTS);
+                String strings[] = bundle.getStringArray(KEY_STRINGS);
+                double doubles[] = bundle.getDoubleArray(KEY_DOUBLES);
+                return (new Location.Builder())
+                        .setId(ints[0])
+                        .setPostcode(ints[1])
+                        .setNumberOfParks(ints[2])
+                        .setName(strings[0])
+                        .setSuburb(strings[1])
+                        .setState(strings[2])
+                        .setLatitude(doubles[0])
+                        .setLongitude(doubles[1])
+                        .setCurrentPrice(bundle.getFloat(KEY_FLOAT))
+                        .build();
+            } catch (NullPointerException e) {
+                Log.wtf(TAG, e);
+            }
+            return null;
+        }
+
+        @Override
+        public Location[] newArray(int size) {
+            // todo implement this correctly
+            return new Location[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        Bundle bundle = new Bundle();
+        bundle.putIntArray(KEY_INTS, new int[]{mId, mPostcode, mNumberOfParks});
+        bundle.putStringArray(KEY_STRINGS, new String[]{mName, mSuburb, mState});
+        bundle.putDoubleArray(KEY_DOUBLES, new double[]{mLatitude, mLongitude});
+        bundle.putFloat(KEY_FLOAT, mCurrentPrice);
+        dest.writeBundle(bundle);
+    }
 }
