@@ -20,15 +20,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final Button b = (Button) findViewById(R.id.button_launch_activity);
-        b.setText(LocationActivity.class.getSimpleName());
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, LocationActivity.class));
-            }
-        });
-
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +44,11 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_settings:
+                return true;
+            case R.id.action_map:
+                startActivity(new Intent(MainActivity.this, LocationActivity.class));
+                return true;
+            case R.id.action_bump:
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
