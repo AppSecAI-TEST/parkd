@@ -15,4 +15,7 @@
     <string name="activity_location_title">%1$s, %2$s\n%3$s, %4$4d</string>
     <string name="activity_location_marker_text">%1$dP $%2$.2fp/h</string>
     <string name="activity_payment_success">payment\nsuccessful</string>
+    <string name="add_time">Add time</string>
+    <string name="find_my_car">Find my car</string>
+    <string name="activity_payment_time_remaining">Time Remaining</string>
 </resources>

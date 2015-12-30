@@ -14,6 +14,8 @@ public class PaymentActivity extends AppCompatActivity {
     private static final String TAG = PaymentActivity.class.getSimpleName();
     private Location mLocation;
 
+    private static final boolean TESTING_SUCCESSFUL = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,8 +31,13 @@ public class PaymentActivity extends AppCompatActivity {
                         getString(R.string.activity_location_title),
                         mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
         );
+
         TextView paymentStatus = (TextView) findViewById(R.id.payment_status_textview);
-        paymentStatus.setText(getString(R.string.activity_payment_success));
-        paymentStatus.setTextColor(getColor(R.color.colorPrimary));
+
+        if (TESTING_SUCCESSFUL) {
+            paymentStatus.setText(getString(R.string.activity_payment_success));
+            paymentStatus.setTextColor(getColor(R.color.colorPrimary));
+        }
+
     }
 }

@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context="com.vinot.parkd.PaymentActivity">
@@ -20,8 +17,43 @@
         android:textSize="35sp"
         />
     <TextView
+        android:id="@+id/textview_time_remaining"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/activity_payment_time_remaining"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:layout_below="@id/payment_status_textview"
+        android:textColor="@color/colorPrimary"
         />
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearlayout_payment_activity_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/button_add_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:backgroundTint="@color/colorPrimary"
+            android:textAllCaps="false"
+            android:text="@string/add_time"
+            android:textColor="#ffffff"/>
+        <Button
+            android:id="@+id/button_find_my_car"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:textColor="#ffffff"
+            android:text="@string/find_my_car"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/colorPrimary" />
+    </LinearLayout>
+
+
+</RelativeLayout>
