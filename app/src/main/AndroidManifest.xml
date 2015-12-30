@@ -40,6 +40,7 @@
 
         <activity
             android:name=".LocationActivity"
+            android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_location">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />

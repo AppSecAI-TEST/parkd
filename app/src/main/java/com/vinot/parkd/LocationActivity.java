@@ -94,7 +94,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         googleMap.addMarker(new MarkerOptions()
                         .position(latLng)
-                        .title(String.format(getString(R.string.activity_location_marker_text), 2, location.getCurrentPrice()))
+                        .title(String.format(getString(R.string.activity_location_marker_text), 2, location.getCurrentPrice())) // todo set max time based on a Location property
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
         );
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL));
@@ -160,7 +160,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
                 timePicker.setIs24HourView(true);
                 timePicker.setHour(0);
-                timePicker.setMinute(0);
+                timePicker.setMinute(0); // todo set max time based on a Location property
                 timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                     @Override
                     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
@@ -214,6 +214,18 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                             break;
                         case "longitude":
                             b.setLongitude(jsonReader.nextDouble());
+                            break;
+                        case "number_of_parks":
+                            b.setNumberOfParks(jsonReader.nextInt());
+                            break;
+                        case "suburb":
+                            b.setSuburb(jsonReader.nextString());
+                            break;
+                        case "state":
+                            b.setState(jsonReader.nextString());
+                            break;
+                        case "postcode":
+                            b.setPostcode(jsonReader.nextInt());
                             break;
                         default: // todo logic to read and parse current price
                             jsonReader.skipValue();

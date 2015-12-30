@@ -34,7 +34,7 @@ public class Location {
         private String mSuburb = DEFAULT_SUBURB;
         private String mState = DEFAULT_STATE;
         private double mLatitude, mLongitude;
-        private float mCurrentPrice = DEFAULT_PRICE; // todo logic to set the current price
+        private float mCurrentPrice = DEFAULT_PRICE;
         public Location.Builder setId(int id) {
             mId = id;
             return Location.Builder.this;
