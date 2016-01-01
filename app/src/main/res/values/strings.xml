@@ -9,6 +9,7 @@
     <string name="prompt_invitation">place your phone over the\nprompt point and slide it down slowly\nwaiting for activation</string>
     <string name="nfc_information">NFC INFORMATION</string>
     <string name="web_host">10.0.0.71</string>
+    <string name="web_host_1">121.217.228.202</string>
     <string name="fragment_location_textview_id">ID: %1$d</string>
     <string name="fragment_location_textview_name">NAME: %1$s</string>
     <string name="button_payment">pay now total $%1$.2f</string>

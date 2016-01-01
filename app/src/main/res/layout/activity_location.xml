@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,19 +29,18 @@
         tools:context=".LocationActivity"
         tools:showIn="@layout/activity_location">
 
-        <fragment
-            xmlns:map="http://schemas.android.com/apk/res-auto"
+        <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="220dp"
-            map:liteMode="true"/>
+            map:liteMode="true" />
 
         <LinearLayout
+            android:id="@+id/activity_location_linearlayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:id="@+id/activity_location_linearlayout"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
@@ -63,8 +63,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:textSize="20sp"
-                        android:text="@string/label_park_number" />
+                        android:text="@string/label_park_number"
+                        android:textSize="20sp" />
 
                     <NumberPicker
                         android:id="@+id/numberpicker_park"
@@ -83,24 +83,24 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
->
+                android:orientation="horizontal">
+
                 <Button
                     android:id="@+id/button_payment"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.8"
                     android:backgroundTint="@color/colorPrimary"
-                    android:textColor="#ffffff"/>
+                    android:textColor="#ffffff" />
+
                 <Button
                     android:id="@+id/button_code"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.2"
-                    android:textColor="#ffffff"
-                    android:text="@string/button_code"/>
+                    android:text="@string/button_code"
+                    android:textColor="#ffffff" />
             </LinearLayout>
-
 
 
         </LinearLayout>
