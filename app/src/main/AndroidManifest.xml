@@ -58,6 +58,9 @@
                     android:port="3000"
                     android:scheme="http" />
             </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
 
         <activity

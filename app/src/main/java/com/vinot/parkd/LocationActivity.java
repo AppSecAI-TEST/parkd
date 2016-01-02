@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +52,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
+        setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
