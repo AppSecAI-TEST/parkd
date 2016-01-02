@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -103,6 +104,14 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
         );
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL));
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.map_progress_bar).setVisibility(View.INVISIBLE);
+                findViewById(R.id.map_fragment_frame).setVisibility(View.VISIBLE);
+            }
+        }, 2000 /*milliseconds*/);
     }
 
     /**
