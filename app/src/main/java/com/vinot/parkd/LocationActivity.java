@@ -40,6 +40,8 @@ import java.net.URL;
 public class LocationActivity extends AppCompatActivity implements OnMapReadyCallback {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
+    public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
+    public static final String EXTRA_MINUTE = LocationActivity.class.getCanonicalName() + ".EXTRA_MINUTE";
     public static final String ACTION_PAYMENT = LocationActivity.class.getCanonicalName() + ".ACTION_PAYMENT";
 
     private static final String TAG = LocationActivity.class.getSimpleName();
@@ -166,7 +168,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 LocationActivity.this.setTitle(mLocation.getName());
                 TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
                 ancillaryFields.setText(
-                        String.format(getString(R.string.location_activity_title_ancillary_fields),
+                        String.format(getString(R.string.activity_title_ancillary_fields),
                                 mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
                 );
                 ancillaryFields.setVisibility(View.VISIBLE);
@@ -185,6 +187,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                         paymentActivityIntent.setAction(ACTION_PAYMENT);
                         paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
                         paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                        paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                        paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
                         startActivity(paymentActivityIntent);
                     }
                 });

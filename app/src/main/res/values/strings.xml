@@ -15,7 +15,7 @@
     <string name="button_payment">pay now total $%1$.2f</string>
     <string name="button_code">CODE</string>
     <string name="label_park_number">PARK #</string>
-    <string name="location_activity_title_ancillary_fields">%1$s\n%2$s, %3$4d</string>
+    <string name="activity_title_ancillary_fields">%1$s\n%2$s, %3$4d</string>
     <string name="activity_location_marker_text">%1$dP $%2$.2fp/h</string>
     <string name="activity_payment_success">payment\nsuccessful</string>
     <string name="add_time">Add time</string>
