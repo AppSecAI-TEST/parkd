@@ -1,89 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/payment_activity_coordinator_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.vinot.parkd.PaymentActivity">
+    android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/payment_activity_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_alignParentTop="true"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay">
-
-        <TextView
-            android:id="@+id/payment_activity_title_ancillary_fields"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_title_ancillary_fields"
-            android:visibility="gone" />
-
-    </android.support.v7.widget.Toolbar>
-
-    <TextView
-        android:id="@+id/payment_status_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/payment_activity_toolbar"
-        android:gravity="center"
-        android:text="@string/activity_payment_success"
-        android:textAllCaps="true"
-        android:textSize="40sp" />
-
-    <TextView
-        android:id="@+id/textview_time_remaining"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/payment_status_textview"
-        android:gravity="center"
-        android:text="@string/activity_payment_time_remaining"
-        android:textColor="@color/colorPrimary"
-        android:textSize="20sp" />
-
-    <LinearLayout
-        android:id="@+id/linearlayout_payment_activity_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:weightSum="1">
-
-        <Button
-            android:id="@+id/button_add_time"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:backgroundTint="@color/colorPrimary"
-            android:drawableLeft="@drawable/ic_schedule_white_24dp"
-            android:gravity="center"
-            android:text="@string/add_time"
-            android:textAllCaps="false"
-            android:textColor="#ffffff" />
-
-        <Button
-            android:id="@+id/button_find_my_car"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:backgroundTint="@color/colorPrimary"
-            android:drawableLeft="@drawable/ic_place_white_24dp"
-            android:text="@string/find_my_car"
-            android:textAllCaps="false"
-            android:textColor="#ffffff" />
-    </LinearLayout>
-
-    <FrameLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/linearlayout_payment_activity_buttons"
-        android:layout_alignBaseline="@id/linearlayout_payment_activity_buttons"
-        android:layout_below="@id/textview_time_remaining">
+        android:orientation="vertical"
+        tools:context="com.vinot.parkd.PaymentActivity">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/payment_activity_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/payment_activity_title_ancillary_fields"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_title_ancillary_fields"
+                android:visibility="gone" />
+
+        </android.support.v7.widget.Toolbar>
+
+        <TextView
+            android:id="@+id/payment_status_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/payment_activity_toolbar"
+            android:gravity="center"
+            android:text="@string/activity_payment_success"
+            android:textAllCaps="true"
+            android:textSize="40sp" />
+
+        <TextView
+            android:id="@+id/textview_time_remaining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/payment_status_textview"
+            android:gravity="center"
+            android:text="@string/activity_payment_time_remaining"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/linearlayout_payment_activity_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <Button
+                android:id="@+id/button_add_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:backgroundTint="@color/colorPrimary"
+                android:drawableLeft="@drawable/ic_schedule_white_24dp"
+                android:gravity="center"
+                android:text="@string/add_time"
+                android:textAllCaps="false"
+                android:textColor="#ffffff" />
+
+            <Button
+                android:id="@+id/button_find_my_car"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:backgroundTint="@color/colorPrimary"
+                android:drawableLeft="@drawable/ic_place_white_24dp"
+                android:text="@string/find_my_car"
+                android:textAllCaps="false"
+                android:textColor="#ffffff" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/linearlayout_payment_activity_buttons"
+            android:layout_alignBaseline="@id/linearlayout_payment_activity_buttons"
+            android:layout_below="@id/textview_time_remaining">
+
             <TimePicker
                 android:id="@+id/activity_payment_timepicker"
                 android:layout_width="match_parent"
@@ -91,7 +98,9 @@
                 android:layout_gravity="center"
                 android:scaleX="2"
                 android:scaleY="2"
-                android:timePickerMode="spinner"/>
-    </FrameLayout>
+                android:timePickerMode="spinner" />
+        </FrameLayout>
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

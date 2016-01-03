@@ -22,4 +22,5 @@
     <string name="find_my_car">Find my car</string>
     <string name="activity_payment_time_remaining">Time Remaining</string>
     <string name="button_enter_location_pin">enter location pin\ninstead</string>
+    <string name="activity_payment_time_up">Time\'s up Furendo-sama</string>
 </resources>
