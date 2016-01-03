@@ -40,8 +40,8 @@
 
         <activity
             android:name=".LocationActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/title_activity_location">
+            android:label="@string/title_activity_location"
+            android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -58,6 +58,7 @@
                     android:port="3000"
                     android:scheme="http" />
             </intent-filter>
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -65,8 +66,11 @@
 
         <activity
             android:name=".PaymentActivity"
-            android:parentActivityName=".LocationActivity"
-            />
+            android:parentActivityName=".LocationActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".LocationActivity" />
+        </activity>
 
         <!--
 The API key for Google Maps-based APIs is defined as a string resource.

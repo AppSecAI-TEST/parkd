@@ -2,6 +2,7 @@ package com.vinot.parkd;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -20,6 +21,9 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
+        setSupportActionBar((Toolbar) findViewById(R.id.payment_activity_toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mLocation = getIntent().getParcelableExtra(LocationActivity.EXTRA_LOCATION);
         Log.d(TAG, mLocation.getName());
     }
