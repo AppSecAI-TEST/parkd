@@ -20,17 +20,14 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
-        mLocation = (Location) getIntent().getParcelableExtra(LocationActivity.EXTRA_LOCATION);
+        mLocation = getIntent().getParcelableExtra(LocationActivity.EXTRA_LOCATION);
         Log.d(TAG, mLocation.getName());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        PaymentActivity.this.setTitle(String.format(
-                        getString(R.string.activity_location_title),
-                        mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
-        );
+        PaymentActivity.this.setTitle(mLocation.getName());
 
         TextView paymentStatus = (TextView) findViewById(R.id.payment_status_textview);
 

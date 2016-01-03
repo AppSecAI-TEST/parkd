@@ -9,6 +9,7 @@ import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -17,8 +18,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -67,8 +68,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         }
 
         NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-        numberPicker.setMaxValue(10); // todo obtain this from the Location object
-        numberPicker.setMinValue(1); // todo obtain this from the Location object
+        numberPicker.setMaxValue(10);
+        numberPicker.setMinValue(1);
         numberPicker.setFormatter(new NumberPicker.Formatter() {
             @Override
             public String format(int value) {
@@ -150,7 +151,9 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             if (networkInfo != null && networkInfo.isConnected()) {
                 return downloadUrl(urls[0]);
             } else {
-                Toast.makeText(LocationActivity.this, getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+                Snackbar.make(
+                        findViewById(R.id.location_activity_coordinator_layout), R.string.no_network_connection, Snackbar.LENGTH_LONG
+                ).show();
             }
             return null;
         }
@@ -160,10 +163,13 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             super.onPostExecute(downloadedLocation);
             LocationActivity.this.mLocation = downloadedLocation;
             try {
-                LocationActivity.this.setTitle(String.format(
-                                getString(R.string.activity_location_title),
-                                mLocation.getName(), mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
+                LocationActivity.this.setTitle(mLocation.getName());
+                TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
+                ancillaryFields.setText(
+                        String.format(getString(R.string.location_activity_title_ancillary_fields),
+                                mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
                 );
+                ancillaryFields.setVisibility(View.VISIBLE);
 
                 findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
 
