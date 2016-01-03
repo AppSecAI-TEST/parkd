@@ -33,24 +33,15 @@
         </android.support.v7.widget.Toolbar>
 
         <TextView
-            android:id="@+id/payment_status_textview"
+            android:id="@+id/textview_time_remaining"
+            android:padding="@dimen/activity_vertical_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/payment_activity_toolbar"
             android:gravity="center"
-            android:text="@string/activity_payment_success"
-            android:textAllCaps="true"
-            android:textSize="40sp" />
-
-        <TextView
-            android:id="@+id/textview_time_remaining"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/payment_status_textview"
-            android:gravity="center"
             android:text="@string/activity_payment_time_remaining"
             android:textColor="@color/colorPrimary"
-            android:textSize="20sp" />
+            android:textSize="40sp" />
 
         <LinearLayout
             android:id="@+id/linearlayout_payment_activity_buttons"

@@ -50,11 +50,14 @@ public class PaymentActivity extends AppCompatActivity {
         );
         ancillaryFields.setVisibility(View.VISIBLE);
 
-        TextView paymentStatus = (TextView) findViewById(R.id.payment_status_textview);
-
         if (TESTING_SUCCESSFUL) {
-            paymentStatus.setText(getString(R.string.activity_payment_success));
-            paymentStatus.setTextColor(getColor(R.color.greenAccent));
+            Snackbar snackbar = Snackbar.make(
+                    findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
+            );
+            TextView snackbarText = (TextView) snackbar.getView().findViewById(R.id.snackbar_text);
+            snackbarText.setTextColor(Color.GREEN);
+            snackbarText.setAllCaps(true);
+            snackbar.show();
 
             mTimePicker = (TimePicker) findViewById(R.id.activity_payment_timepicker);
             mTimePicker.setIs24HourView(true);
@@ -81,14 +84,14 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 mTimePicker.setMinute(mTimePicker.getMinute() - 1);
-                Snackbar snackbar = Snackbar.make(
-                        findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_time_up, Snackbar.LENGTH_LONG
-                );
-                ((TextView) snackbar.getView().findViewById(R.id.snackbar_text)).setTextColor(Color.GREEN);
-                snackbar.show();
+                doSomething();
             }
         };
         countDownTimer.start();
 
+    }
+
+    private void doSomething() {
+        // todo this
     }
 }

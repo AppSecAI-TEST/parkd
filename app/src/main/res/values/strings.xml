@@ -17,7 +17,7 @@
     <string name="label_park_number">PARK #</string>
     <string name="activity_title_ancillary_fields">%1$s\n%2$s, %3$4d</string>
     <string name="activity_location_marker_text">%1$dP $%2$.2fp/h</string>
-    <string name="activity_payment_success">payment\nsuccessful</string>
+    <string name="activity_payment_success">payment successful</string>
     <string name="add_time">Add time</string>
     <string name="find_my_car">Find my car</string>
     <string name="activity_payment_time_remaining">Time Remaining</string>
