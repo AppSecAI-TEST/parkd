@@ -30,6 +30,7 @@
                 android:id="@+id/location_activity_title_ancillary_fields"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:text="@string/activity_title_ancillary_fields"
                 android:visibility="gone"/>
 

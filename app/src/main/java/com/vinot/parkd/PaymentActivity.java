@@ -54,9 +54,6 @@ public class PaymentActivity extends AppCompatActivity {
             Snackbar snackbar = Snackbar.make(
                     findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
             );
-            TextView snackbarText = (TextView) snackbar.getView().findViewById(R.id.snackbar_text);
-            snackbarText.setTextColor(Color.GREEN);
-            snackbarText.setAllCaps(true);
             snackbar.show();
 
             mTimePicker = (TimePicker) findViewById(R.id.activity_payment_timepicker);
@@ -80,7 +77,6 @@ public class PaymentActivity extends AppCompatActivity {
                     }
                 }
             }
-
             @Override
             public void onFinish() {
                 mTimePicker.setMinute(mTimePicker.getMinute() - 1);
@@ -88,7 +84,6 @@ public class PaymentActivity extends AppCompatActivity {
             }
         };
         countDownTimer.start();
-
     }
 
     private void doSomething() {
