@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "parkd-f186d",
+    "project_number": "996419448001",
+    "name": "Parkd"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996419448001:android:1642507fbb5f9ed2",
+        "client_id": "android:com.vinot.parkd",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.vinot.parkd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "996419448001-rp38umtun40474scgbuqgt5hfcaq0dl0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vinot.parkd",
+            "certificate_hash": "D7D485A95098AE1EDE7866BF8A95BE8C3ED81AA0"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
