@@ -42,10 +42,12 @@ public class SessionService extends Service {
      * need to implement a spinning animation to indicate loading.
      *
      * @param acct GoogleSignInAccount obtained after a successful Google login
+     * @return true if successful, otherwise false
      */
-    public void init(GoogleSignInAccount acct) {
+    public boolean init(GoogleSignInAccount acct) {
         mSession.edit().putString(
                 getString(R.string.sharedpreferences_session_idtoken), acct.getIdToken()
         ).apply();
+        return true;
     }
 }

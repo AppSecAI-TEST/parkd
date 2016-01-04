@@ -1,15 +1,17 @@
 package com.vinot.parkd;
 
-import android.content.BroadcastReceiver;
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -28,12 +30,11 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 507;
+    private static final int RC_ACCESS_NETWORK_STATE = 128;
+    private static final int RC_INTERNET = 26;
 
     private Intent mMainActivityIntent;
-    private Snackbar mSnackbar;
-    private BroadcastReceiver mBroadcastReceiver;
     private ConnectivityManager mConnectivityManager;
-    private NetworkInfo mNetworkInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,15 +57,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         mMainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
-        mSnackbar = Snackbar.make(
-                findViewById(R.id.login_activity_coordinator_layout),
-                getString(R.string.no_network_connection),
-                Snackbar.LENGTH_INDEFINITE
-        );
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        mNetworkInfo =  mConnectivityManager.getActiveNetworkInfo();
-
-        broadcastRegistation();
     }
 
     @Override
@@ -76,16 +69,20 @@ public class LoginActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new SignInButton.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isInternetConnected()) {
+                    Snackbar.make(
+                            findViewById(R.id.login_activity_coordinator_layout),
+                            getString(R.string.no_network_connection),
+                            Snackbar.LENGTH_LONG
+                    ).show();
+                    return;
+                }
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
         });
 
         getSupportActionBar().setTitle(R.string.activity_login_title);
-
-        if (!isInternetConnected() && !mSnackbar.isShown()) {
-            mSnackbar.show();
-        }
 
         bindService(
                 new Intent(LoginActivity.this, SessionService.class), mServiceConnection, Context.BIND_AUTO_CREATE
@@ -109,15 +106,11 @@ public class LoginActivity extends AppCompatActivity {
             unbindService(mServiceConnection);
             mBound = false;
         }
-        if (mBroadcastReceiver != null) {
-            unregisterReceiver(mBroadcastReceiver);
-        }
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            if (mBound) {
-                mSessionService.init(result.getSignInAccount());
+            if (mBound && mSessionService.init(result.getSignInAccount())) {
                 startActivity(mMainActivityIntent);
                 finish();
             } else {
@@ -128,33 +121,6 @@ public class LoginActivity extends AppCompatActivity {
                     findViewById(R.id.login_activity_coordinator_layout), R.string.activity_login_failed_login, Snackbar.LENGTH_LONG
             ).show();
         }
-    }
-
-    // broadcasting
-    private void broadcastRegistation() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "ConnectivityManager.CONNECTIVITY_ACTION");
-                if (mBound) {
-                    if (!isInternetConnected() && !mSnackbar.isShown()) {
-                        mSnackbar.show();
-                    } else if (isInternetConnected() && mSnackbar.isShown()) {
-                        mSnackbar.dismiss();
-                    }
-                } else {
-                    Log.wtf(TAG, "Not bound to SessionService");
-                }
-
-                if (mSnackbar.isShown()) Log.d(TAG, "SHOWN");
-                else Log.d(TAG, "DISMISSED");
-            }
-        };
-
-        registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     // binding
@@ -180,6 +146,19 @@ public class LoginActivity extends AppCompatActivity {
     };
 
     private boolean isInternetConnected() {
-        return mNetworkInfo != null && mNetworkInfo.isConnected();
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_NETWORK_STATE},
+                    RC_ACCESS_NETWORK_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
+                    RC_ACCESS_NETWORK_STATE);
+        }
+
+        NetworkInfo networkInfo =  mConnectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 }
