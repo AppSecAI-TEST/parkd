@@ -25,6 +25,7 @@
     <string name="activity_payment_time_up">Time\'s up Furendo-sama</string>
 
     <string name="activity_login_title">Welcome</string>
+    <string name="activity_login_failed_login">Login failed.</string>
     <string name="activity_login_explanatory_text">
         Park\'d is the best way for you to make the\n
         most of your parking experience in your\n
