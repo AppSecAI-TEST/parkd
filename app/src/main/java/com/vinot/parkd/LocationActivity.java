@@ -2,7 +2,6 @@ package com.vinot.parkd;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -59,18 +58,6 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        /*
-        SharedPreferences session = getSharedPreferences(
-                getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
-        );
-
-        if (session.contains(getString(R.string.sharedpreferences_session_idtoken))) {
-            Log.d(TAG, session.getString(getString(R.string.sharedpreferences_session_idtoken), null));
-        } else {
-            Log.wtf(TAG, "SharedPreferences not functioning correctly");
-        }
-        */
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");

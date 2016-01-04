@@ -116,6 +116,7 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 Log.wtf(TAG, "Failed to bind instance of SessionService");
             }
+
         } else {
             Snackbar.make(
                     findViewById(R.id.login_activity_coordinator_layout), R.string.activity_login_failed_login, Snackbar.LENGTH_LONG
