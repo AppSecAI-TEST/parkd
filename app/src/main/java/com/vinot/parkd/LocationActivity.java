@@ -60,6 +60,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        /*
         SharedPreferences session = getSharedPreferences(
                 getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
         );
@@ -69,6 +70,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         } else {
             Log.wtf(TAG, "SharedPreferences not functioning correctly");
         }
+        */
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
@@ -98,9 +100,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera.
+     * Manipulates the map once available.  This callback is triggered when the map is ready.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
