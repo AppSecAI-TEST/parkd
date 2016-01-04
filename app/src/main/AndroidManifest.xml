@@ -74,7 +74,7 @@
                 android:value=".LocationActivity" />
         </activity>
 
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".LoginActivity" />
 
         <!--
 The API key for Google Maps-based APIs is defined as a string resource.

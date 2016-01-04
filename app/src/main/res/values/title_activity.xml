@@ -3,4 +3,6 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_nfc">NFC Activity</string>
     <string name="title_activity_location">Location Activity</string>
+    <string name="activity_login_title">Welcome</string>
+    <string name="activity_title_ancillary_fields">%1$s\n%2$s, %3$4d</string>
 </resources>
