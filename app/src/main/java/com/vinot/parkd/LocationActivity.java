@@ -2,6 +2,7 @@ package com.vinot.parkd;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -43,6 +44,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
     public static final String EXTRA_MINUTE = LocationActivity.class.getCanonicalName() + ".EXTRA_MINUTE";
     public static final String ACTION_PAYMENT = LocationActivity.class.getCanonicalName() + ".ACTION_PAYMENT";
+    private static final int RC_LOGIN = 623;
 
     private static final String TAG = LocationActivity.class.getSimpleName();
     private static final float ZOOM_LEVEL = 15f;
@@ -57,6 +59,16 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SharedPreferences session = getSharedPreferences(
+                getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
+        );
+
+        if (session.contains(getString(R.string.sharedpreferences_session_idtoken))) {
+            Log.d(TAG, session.getString(getString(R.string.sharedpreferences_session_idtoken), null));
+        } else {
+            Log.wtf(TAG, "SharedPreferences not functioning correctly");
+        }
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");

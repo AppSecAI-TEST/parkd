@@ -1,13 +1,14 @@
 package com.vinot.parkd;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -30,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.login_activity_toolbar));
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -58,7 +60,6 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         getSupportActionBar().setTitle(R.string.activity_login_title);
-
     }
 
     @Override
@@ -74,8 +75,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            GoogleSignInAccount acct = result.getSignInAccount(); // todo do something with this account info
-            Log.d(TAG, acct.getDisplayName());
+            GoogleSignInAccount acct = result.getSignInAccount();
+            SharedPreferences session = getSharedPreferences(
+                    getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
+            );
+            session.edit().putString(
+                    getString(R.string.sharedpreferences_session_idtoken), acct.getIdToken()
+            ).apply();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         } else {
