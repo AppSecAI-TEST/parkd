@@ -36,6 +36,40 @@ public class PaymentActivity extends AppCompatActivity {
         mLocation = getIntent().getParcelableExtra(LocationActivity.EXTRA_LOCATION);
         mHour = getIntent().getIntExtra(LocationActivity.EXTRA_HOUR, 0);
         mMinute = getIntent().getIntExtra(LocationActivity.EXTRA_MINUTE, 0);
+
+        if (TESTING_SUCCESSFUL) {
+            Snackbar.make(
+                    findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
+            ).show();
+
+            mTimePicker = (TimePicker) findViewById(R.id.activity_payment_timepicker);
+            mTimePicker.setIs24HourView(true);
+            mTimePicker.setHour(mHour);
+            mTimePicker.setMinute(mMinute);
+            mTimePicker.setEnabled(false);
+
+            CountDownTimer countDownTimer = new CountDownTimer((mHour * 60 + mMinute) * MINUTE, MINUTE) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    if (mTimePicker != null) {
+                        if (mTimePicker.getMinute() == 0 && mTimePicker.getHour() != 0) {
+                            // hour transition
+                            mTimePicker.setHour(mTimePicker.getHour() - 1);
+                            mTimePicker.setMinute(59);
+                        } else {
+                            // minute transition
+                            mTimePicker.setMinute(mTimePicker.getMinute() - 1);
+                        }
+                    }
+                }
+                @Override
+                public void onFinish() {
+                    mTimePicker.setMinute(mTimePicker.getMinute() - 1);
+                    doSomething();
+                }
+            };
+            countDownTimer.start();
+        }
     }
 
     @Override
@@ -49,40 +83,6 @@ public class PaymentActivity extends AppCompatActivity {
                         mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
         );
         ancillaryFields.setVisibility(View.VISIBLE);
-
-        if (TESTING_SUCCESSFUL) {
-            Snackbar.make(
-                    findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
-            ).show();
-
-            mTimePicker = (TimePicker) findViewById(R.id.activity_payment_timepicker);
-            mTimePicker.setIs24HourView(true);
-            mTimePicker.setHour(mHour);
-            mTimePicker.setMinute(mMinute);
-            mTimePicker.setEnabled(false);
-        }
-
-        CountDownTimer countDownTimer = new CountDownTimer((mHour * 60 + mMinute) * MINUTE, MINUTE) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if (mTimePicker != null) {
-                    if (mTimePicker.getMinute() == 0 && mTimePicker.getHour() != 0) {
-                        // hour transition
-                        mTimePicker.setHour(mTimePicker.getHour() - 1);
-                        mTimePicker.setMinute(59);
-                    } else {
-                        // minute transition
-                        mTimePicker.setMinute(mTimePicker.getMinute() - 1);
-                    }
-                }
-            }
-            @Override
-            public void onFinish() {
-                mTimePicker.setMinute(mTimePicker.getMinute() - 1);
-                doSomething();
-            }
-        };
-        countDownTimer.start();
     }
 
     private void doSomething() {
