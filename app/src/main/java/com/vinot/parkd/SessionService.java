@@ -25,6 +25,7 @@ public class SessionService extends Service {
     private SharedPreferences mSession;
     private BroadcastReceiver mBroadcastReceiver;
     private boolean mLoggingIn = false;
+    private GoogleSignInAccount mGoogleSignInAccount;
 
     @Override
     public boolean onUnbind(Intent intent) {
@@ -53,8 +54,10 @@ public class SessionService extends Service {
      * @param acct GoogleSignInAccount obtained after a successful Google login
      */
     public void init(GoogleSignInAccount acct) {
+        mGoogleSignInAccount = acct;
+
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
-        params.put("idToken", acct.getIdToken());
+        params.put("idToken", mGoogleSignInAccount.getIdToken());
 
         mLoggingIn = true;
 
@@ -67,9 +70,9 @@ public class SessionService extends Service {
      * Once we know that we are authenticated with the Park'd server we can commit the session
      * information to local storage (SharedPreferences).
      */
-    public void cacheLogin(GoogleSignInAccount acct) {
+    private void cacheLogin() {
         mSession.edit().putString(
-                getString(R.string.sharedpreferences_session_idtoken), acct.getIdToken()
+                getString(R.string.sharedpreferences_session_idtoken), mGoogleSignInAccount.getIdToken()
         ).apply();
         // todo further local storage logic (username, email, etc.)
     }
@@ -86,9 +89,13 @@ public class SessionService extends Service {
              * the PostRequester.ACTION_POST_COMPLETED intent.
              */
             public void onReceive(Context context, Intent intent) {
+                boolean success;
                 if (mLoggingIn) {
+                    if (success = intent.getBooleanExtra(PostRequester.EXTRA_SUCCESS, false)) {
+                        cacheLogin();
+                    }
                     Intent loginIntent = new Intent(ACTION_LOGIN);
-                    loginIntent.putExtra(EXTRA_LOGIN_SUCCESS, intent.getBooleanExtra(PostRequester.EXTRA_SUCCESS, false));
+                    loginIntent.putExtra(EXTRA_LOGIN_SUCCESS, success);
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(loginIntent);
                     mLoggingIn = false;
                 }

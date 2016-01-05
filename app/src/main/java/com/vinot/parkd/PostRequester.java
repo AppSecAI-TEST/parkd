@@ -2,6 +2,7 @@ package com.vinot.parkd;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -18,9 +19,6 @@ public class PostRequester extends Activity {
 
     public static final String ACTION_POST_COMPLETED = PostRequester.class.getCanonicalName() + ".ACTION_POST_COMPLETED";
     public static final String EXTRA_SUCCESS = PostRequester.class.getCanonicalName() + ".EXTRA_SUCCESS";
-
-    private final int READ_TIMEOUT = 10000; /* milliseconds */
-    private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
 
     private URL mUrl;
     private Map<String, Object> mParams;
@@ -58,37 +56,51 @@ public class PostRequester extends Activity {
      * When the post is completed, fire off a broadcast indicating success or failure.
      */
     public void performPostRequest() {
-        HttpURLConnection conn = null;
-        Intent intent = new Intent(ACTION_POST_COMPLETED);
-        try {
-            byte[] postDataBytes = producePostRequestBytes(mParams);
+        new PerformPostTask().execute();
+    }
 
-            conn = (HttpURLConnection) mUrl.openConnection();
-            conn.setReadTimeout(READ_TIMEOUT);
-            conn.setConnectTimeout(CONNECT_TIMEOUT);
-            conn.setChunkedStreamingMode(0);
-            conn.setRequestMethod("POST");
+    private class PerformPostTask extends AsyncTask<Void, Void, Boolean> {
+        private final int READ_TIMEOUT = 10000; /* milliseconds */
+        private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            HttpURLConnection conn = null;
+            try {
+                byte[] postDataBytes = producePostRequestBytes(mParams);
+
+                conn = (HttpURLConnection) mUrl.openConnection();
+                conn.setReadTimeout(READ_TIMEOUT);
+                conn.setConnectTimeout(CONNECT_TIMEOUT);
+                conn.setChunkedStreamingMode(0);
+                conn.setRequestMethod("POST");
 //            conn.setDoInput(true);
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 
-            conn.setDoOutput(true);
-            conn.getOutputStream().write(postDataBytes);
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(postDataBytes);
 
-            Log.d(TAG, getString(R.string.http_response, mUrl.toString(), conn.getResponseCode()));
+                Log.d(TAG, PostRequester.this.getString(R.string.http_response, mUrl.toString(), conn.getResponseCode()));
+                Log.d(TAG, conn.getInputStream().toString());
 
-            Log.d(TAG, conn.getInputStream().toString());
+                // todo logic for getting the server's response after the post request
+                // todo this might involve CookieManager
+                return true;
+            } catch (java.io.IOException e) {
+                Log.wtf(TAG, e);
+            } finally {
+                if (conn != null) conn.disconnect();
+            }
+            return false;
+        }
 
-            // todo logic for getting the server's response after the post request
-            // todo this might involve CookieManager
-
-            intent.putExtra(EXTRA_SUCCESS, true);
-
-        } catch (java.io.IOException e) {
-            Log.wtf(TAG, e);
-        } finally {
-            if (conn != null) conn.disconnect();
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        @Override
+        protected void onPostExecute(Boolean postResult) {
+            super.onPostExecute(postResult);
+            Intent intent = new Intent(ACTION_POST_COMPLETED);
+            intent.putExtra(EXTRA_SUCCESS, postResult);
+            LocalBroadcastManager.getInstance(PostRequester.this).sendBroadcast(intent);
         }
     }
 }

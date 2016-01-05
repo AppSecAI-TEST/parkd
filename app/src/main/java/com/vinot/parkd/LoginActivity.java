@@ -183,7 +183,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 if (mBound) {
                     if (intent.getBooleanExtra(SessionService.EXTRA_LOGIN_SUCCESS, false)) {
-                        mSessionService.cacheLogin(mGoogleSignInAccount);
                         startActivity(mMainActivityIntent);
                         finish();
                     } else {
