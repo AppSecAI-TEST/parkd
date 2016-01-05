@@ -78,7 +78,10 @@
             android:name=".SessionService"
             android:enabled="true"
             android:exported="false" />
-
+        <service
+            android:name=".PostRequesterService"
+            android:enabled="true"
+            android:exported="false" />
 
         <!--
 The API key for Google Maps-based APIs is defined as a string resource.
