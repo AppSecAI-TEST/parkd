@@ -141,8 +141,6 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
         private final int READ_TIMEOUT = 10000; /* milliseconds */
         private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
-        private final String REQUEST_METHOD = "GET";
-        private final boolean DO_INPUT = true;
 
         private ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -220,14 +218,12 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
                 conn.setReadTimeout(READ_TIMEOUT);
                 conn.setConnectTimeout(CONNECT_TIMEOUT);
-                conn.setRequestMethod(REQUEST_METHOD);
-                conn.setDoInput(DO_INPUT);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
 
-                Log.d(TAG, String.format("The respone from %s is %d", url, conn.getResponseCode()));
+                Log.d(TAG, getString(R.string.http_response, url, conn.getResponseCode()));
 
                 return readLocation(conn.getInputStream());
-            } catch (MalformedURLException e) {
-                Log.wtf(TAG, e);
             } catch (IOException e) {
                 Log.wtf(TAG, e);
             }

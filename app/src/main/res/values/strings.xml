@@ -4,6 +4,7 @@
     <string name="web_host">10.0.0.71</string>
     <string name="web_host_1">121.217.228.202</string>
     <string name="server_client_id">996419448001-0e12a2qee2t5545sstc8oad87glhih29.apps.googleusercontent.com</string>
+    <string name="http_response">The respone from %1$s is %2$d</string>
 
     <string name="action_settings">Settings</string>
     <string name="action_bump">Bump</string>
