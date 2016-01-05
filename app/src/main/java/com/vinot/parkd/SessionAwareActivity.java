@@ -11,7 +11,7 @@ import android.util.Log;
 /**
  * Activity to be extended for automatic binding to SessionService
  */
-public class SessionAwareActivity extends AppCompatActivity {
+public abstract class SessionAwareActivity extends AppCompatActivity {
 
     private static String TAG = SessionAwareActivity.class.getSimpleName();
 
