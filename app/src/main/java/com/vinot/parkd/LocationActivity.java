@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
@@ -32,17 +31,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
     public static final String EXTRA_MINUTE = LocationActivity.class.getCanonicalName() + ".EXTRA_MINUTE";
     public static final String ACTION_PAYMENT = LocationActivity.class.getCanonicalName() + ".ACTION_PAYMENT";
-    private static final int RC_LOGIN = 623;
 
     private static final String TAG = LocationActivity.class.getSimpleName();
     private static final float ZOOM_LEVEL = 15f;
@@ -56,7 +53,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
@@ -123,8 +120,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
      * At this stage Android does not even support multiple messages, so this is overkill
      * http://stackoverflow.com/questions/17496811/android-putting-multiple-ndef-messages-in-one-nfc-tag
      *
-     * @param rawMsgs
-     * @return
+     * @param rawMsgs array of raw NFC messages from a Tag
+     * @return array of NdefMessages, converted cast from the Parcelables
      */
     private NdefMessage[] produceNdefMessages(final Parcelable[] rawMsgs) {
         NdefMessage messages[] = null;
@@ -177,15 +174,32 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int hourOfDay = timePicker.getHour();
-                        int minute = timePicker.getMinute();
-                        Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                        paymentActivityIntent.setAction(ACTION_PAYMENT);
-                        paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
-                        paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
-                        paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                        paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
-                        startActivity(paymentActivityIntent);
+                        if (mBoundToSessionService) {
+                            if (mSessionService.loggedIn())  {
+                                int hourOfDay = timePicker.getHour();
+                                int minute = timePicker.getMinute();
+                                Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
+                                paymentActivityIntent.setAction(ACTION_PAYMENT);
+                                paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
+                                paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                                paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                                paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
+                                startActivity(paymentActivityIntent);
+                            } else {
+                                Snackbar loginSnackbar;
+                                loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
+                                loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        // todo implement this as an activityForResult or using a dialogue box to login.
+                                        startActivity(new Intent(LocationActivity.this, LoginActivity.class));
+                                    }
+                                });
+                                loginSnackbar.show();
+                            }
+                        } else {
+                            Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
+                        }
                     }
                 });
 
@@ -229,7 +243,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             return null;
         }
 
-        private Location readLocation(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
+        private Location readLocation(final InputStream inputStream) throws IOException {
             Location.Builder b = new Location.Builder();
             JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
             try {

@@ -31,9 +31,11 @@
 
     <string name="button_enter_location_pin">enter location pin\ninstead</string>
 
-    <string name="activity_payment_time_up">Time\'s up Furendo-sama</string>
+    <string name="activity_payment_time_up">Time\'s up!</string>
+    <string name="not_logged_in">You need to authenticate before you can use Park\'d</string>
 
     <string name="activity_login_failed_login">Login failed.</string>
+    <string name="login">login</string>
     <string name="activity_login_explanatory_text">
         park\'d is the best way for you to make the\n
         most of your parking experience in your\n

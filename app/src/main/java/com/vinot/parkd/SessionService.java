@@ -15,7 +15,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.LinkedHashMap;
 
-
 public class SessionService extends Service {
 
     public static final String TAG = SessionService.class.getSimpleName();
@@ -88,6 +87,10 @@ public class SessionService extends Service {
         // todo further local storage logic (username, email, etc.)
     }
 
+    public boolean loggedIn() {
+        return false;
+    }
+
     // broadcasting
     private void broadcastRegistation() {
         final IntentFilter intentFilter = new IntentFilter();
@@ -100,7 +103,6 @@ public class SessionService extends Service {
              * the PostRequesterService.ACTION_POST_COMPLETED intent.
              */
             public void onReceive(Context context, Intent intent) {
-
                 boolean success;
                 if (mLoggingIn) {
                     if (success = intent.getBooleanExtra(PostRequesterService.EXTRA_SUCCESS, false)) {
