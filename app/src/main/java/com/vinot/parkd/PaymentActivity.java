@@ -51,10 +51,9 @@ public class PaymentActivity extends AppCompatActivity {
         ancillaryFields.setVisibility(View.VISIBLE);
 
         if (TESTING_SUCCESSFUL) {
-            Snackbar snackbar = Snackbar.make(
+            Snackbar.make(
                     findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
-            );
-            snackbar.show();
+            ).show();
 
             mTimePicker = (TimePicker) findViewById(R.id.activity_payment_timepicker);
             mTimePicker.setIs24HourView(true);

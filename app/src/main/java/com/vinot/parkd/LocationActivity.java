@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
@@ -32,12 +31,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-public class LocationActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -56,7 +53,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
@@ -86,9 +83,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera.
+     * Manipulates the map once available.  This callback is triggered when the map is ready.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -125,8 +120,8 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
      * At this stage Android does not even support multiple messages, so this is overkill
      * http://stackoverflow.com/questions/17496811/android-putting-multiple-ndef-messages-in-one-nfc-tag
      *
-     * @param rawMsgs
-     * @return
+     * @param rawMsgs array of raw NFC messages from a Tag
+     * @return array of NdefMessages, converted cast from the Parcelables
      */
     private NdefMessage[] produceNdefMessages(final Parcelable[] rawMsgs) {
         NdefMessage messages[] = null;
@@ -142,8 +137,6 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
         private final int READ_TIMEOUT = 10000; /* milliseconds */
         private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
-        private final String REQUEST_METHOD = "GET";
-        private final boolean DO_INPUT = true;
 
         private ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -181,15 +174,32 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int hourOfDay = timePicker.getHour();
-                        int minute = timePicker.getMinute();
-                        Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                        paymentActivityIntent.setAction(ACTION_PAYMENT);
-                        paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
-                        paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
-                        paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                        paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
-                        startActivity(paymentActivityIntent);
+                        if (mBoundToSessionService) {
+                            if (mSessionService.loggedIn())  {
+                                int hourOfDay = timePicker.getHour();
+                                int minute = timePicker.getMinute();
+                                Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
+                                paymentActivityIntent.setAction(ACTION_PAYMENT);
+                                paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
+                                paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                                paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                                paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
+                                startActivity(paymentActivityIntent);
+                            } else {
+                                Snackbar loginSnackbar;
+                                loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
+                                loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        // todo implement this as an activityForResult or using a dialogue box to login.
+                                        startActivity(new Intent(LocationActivity.this, LoginActivity.class));
+                                    }
+                                });
+                                loginSnackbar.show();
+                            }
+                        } else {
+                            Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
+                        }
                     }
                 });
 
@@ -221,21 +231,19 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                 HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
                 conn.setReadTimeout(READ_TIMEOUT);
                 conn.setConnectTimeout(CONNECT_TIMEOUT);
-                conn.setRequestMethod(REQUEST_METHOD);
-                conn.setDoInput(DO_INPUT);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
 
-                Log.d(TAG, String.format("The respone from %s is %d", url, conn.getResponseCode()));
+                Log.d(TAG, getString(R.string.http_response, url, conn.getResponseCode()));
 
                 return readLocation(conn.getInputStream());
-            } catch (MalformedURLException e) {
-                Log.wtf(TAG, e);
             } catch (IOException e) {
                 Log.wtf(TAG, e);
             }
             return null;
         }
 
-        private Location readLocation(final InputStream inputStream) throws IOException, UnsupportedEncodingException {
+        private Location readLocation(final InputStream inputStream) throws IOException {
             Location.Builder b = new Location.Builder();
             JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
             try {

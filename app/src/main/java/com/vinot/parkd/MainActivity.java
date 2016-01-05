@@ -1,13 +1,13 @@
 package com.vinot.parkd;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_bump:
                 return true;
+            case R.id.action_clear_shared_preferences:
+                SharedPreferences sharedPreferences = getSharedPreferences(
+                        getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
+                );
+                sharedPreferences.edit().clear().apply();
             default:
                 return super.onOptionsItemSelected(item);
         }
