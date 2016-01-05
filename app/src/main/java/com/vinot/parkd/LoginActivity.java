@@ -2,20 +2,16 @@ package com.vinot.parkd;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,7 +25,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends SessionAwareActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
@@ -94,10 +90,6 @@ public class LoginActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(R.string.activity_login_title);
 
-        bindService(
-                new Intent(LoginActivity.this, SessionService.class), mServiceConnection, Context.BIND_AUTO_CREATE
-        );
-
         broadcastRegistation();
     }
 
@@ -114,16 +106,12 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (mBound) {
-            unbindService(mServiceConnection);
-            mBound = false;
-        }
         if (mBroadcastReceiver != null) LocalBroadcastManager.getInstance(LoginActivity.this).unregisterReceiver(mBroadcastReceiver);
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            if (mBound) {
+            if (mBoundToSessionService) {
                 mGoogleSignInAccount = result.getSignInAccount();
                 mSessionService.init(mGoogleSignInAccount);
             } else {
@@ -135,28 +123,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    // binding
-    private boolean mBound = false;
-    private SessionService mSessionService = null;
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (service instanceof SessionService.SessionServiceBinder) {
-                mSessionService = ((SessionService.SessionServiceBinder) service).getBoundService();
-                Log.d(TAG, "Successfully bound to SessionService");
-                mBound = true;
-            } else {
-                Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of SessionService.HttpServiceBinder"));
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mBound = false;
-            Log.wtf(TAG, "Unexpected disconnection from SessionService");
-        }
-    };
-
     private boolean isInternetConnected() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE)
@@ -167,7 +133,7 @@ public class LoginActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
-                    RC_ACCESS_NETWORK_STATE);
+                    RC_INTERNET);
         }
 
         NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
@@ -182,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (mBound) {
+                if (mBoundToSessionService) {
                     if (intent.getBooleanExtra(SessionService.EXTRA_LOGIN_SUCCESS, false)) {
                         startActivity(mMainActivityIntent);
                         finish();
