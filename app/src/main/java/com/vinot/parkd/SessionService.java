@@ -80,15 +80,24 @@ public class SessionService extends Service {
      * information to local storage (SharedPreferences).
      */
     private void cacheLogin() {
-        Log.d(TAG, "Caching login details in SharedPreferences");
-        mSession.edit().putString(
-                getString(R.string.sharedpreferences_session_idtoken), mGoogleSignInAccount.getIdToken()
-        ).apply();
+        Log.d(TAG, "Caching login and session details in SharedPreferences");
+        mSession.edit()
+                .putString(
+                        getString(R.string.sharedpreferences_session_idtoken), mGoogleSignInAccount.getIdToken()
+                )
+                .putBoolean(
+                        getString(R.string.sharedpreferences_session_logged_in), true
+                )
+                .apply();
         // todo further local storage logic (username, email, etc.)
+        // todo use CookieManager for something similar to this
     }
 
     public boolean loggedIn() {
-        return false;
+        // todo this should be logic affirming that we are authenticated with the server.
+        // todo it will perform a check with the server that we are logged in, rather than relying
+        // todo on cached information.
+        return mSession.getBoolean(getString(R.string.sharedpreferences_session_logged_in), false);
     }
 
     // broadcasting
