@@ -4,22 +4,23 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
+import java.util.LinkedHashMap;
+
+
 public class SessionService extends Service {
+
+    private final int READ_TIMEOUT = 10000; /* milliseconds */
+    private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
 
     private final static String TAG = SessionService.class.getSimpleName();
     IBinder mSessionServiceBinder = new SessionServiceBinder();
 
     private SharedPreferences mSession;
-
-
-    public SessionService() {}
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -30,13 +31,15 @@ public class SessionService extends Service {
     }
 
     public class SessionServiceBinder extends Binder {
-        public SessionService getBoundService() { return SessionService.this; }
+        public SessionService getBoundService() {
+            return SessionService.this;
+        }
     }
 
     /**
      * Initialise a session in the app, storing appropriate user and session credentials in
      * SharedPreferences.
-     *
+     * <p/>
      * Send the token to the server for validation.  This function *should* be blocking, as we
      * don't want the user proceeding until they login successfully.  Should it take a long time, we
      * need to implement a spinning animation to indicate loading.
@@ -45,6 +48,14 @@ public class SessionService extends Service {
      * @return true if successful, otherwise false
      */
     public boolean init(GoogleSignInAccount acct) {
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        params.put("idToken", acct.getIdToken());
+
+        new PostRequester(
+                getString(R.string.url_authenticate_user),
+                params
+        ).performPostRequest();
+
         mSession.edit().putString(
                 getString(R.string.sharedpreferences_session_idtoken), acct.getIdToken()
         ).apply();
