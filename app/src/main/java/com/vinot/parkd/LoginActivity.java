@@ -1,9 +1,11 @@
 package com.vinot.parkd;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
@@ -35,6 +38,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private Intent mMainActivityIntent;
     private ConnectivityManager mConnectivityManager;
+    private BroadcastReceiver mBroadcastReceiver;
+    private GoogleSignInAccount mGoogleSignInAccount;
+    private Snackbar mLoginFailedSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,9 @@ public class LoginActivity extends AppCompatActivity {
 
         mMainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        mLoginFailedSnackbar = Snackbar.make(
+                findViewById(R.id.login_activity_coordinator_layout), R.string.activity_login_failed_login, Snackbar.LENGTH_LONG
+        );
     }
 
     @Override
@@ -82,11 +91,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        getSupportActionBar().setTitle(R.string.activity_login_title);
+        if (getSupportActionBar() != null) getSupportActionBar().setTitle(R.string.activity_login_title);
 
         bindService(
                 new Intent(LoginActivity.this, SessionService.class), mServiceConnection, Context.BIND_AUTO_CREATE
         );
+
+        broadcastRegistation();
     }
 
     @Override
@@ -106,21 +117,20 @@ public class LoginActivity extends AppCompatActivity {
             unbindService(mServiceConnection);
             mBound = false;
         }
+        if (mBroadcastReceiver != null) unregisterReceiver(mBroadcastReceiver);
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            if (mBound && mSessionService.init(result.getSignInAccount())) {
-                startActivity(mMainActivityIntent);
-                finish();
+            if (mBound) {
+                mGoogleSignInAccount = result.getSignInAccount();
+                mSessionService.init(mGoogleSignInAccount);
             } else {
-                Log.wtf(TAG, "Failed to bind instance of SessionService");
+                Log.wtf(TAG, new IllegalStateException("Failed to bind instance of SessionService"));
             }
-
         } else {
-            Snackbar.make(
-                    findViewById(R.id.login_activity_coordinator_layout), R.string.activity_login_failed_login, Snackbar.LENGTH_LONG
-            ).show();
+            Log.d(TAG, "Login failed because GoogleSignInResult.isSuccess() was false");
+            if (!mLoginFailedSnackbar.isShown()) mLoginFailedSnackbar.show();
         }
     }
 
@@ -159,7 +169,32 @@ public class LoginActivity extends AppCompatActivity {
                     RC_ACCESS_NETWORK_STATE);
         }
 
-        NetworkInfo networkInfo =  mConnectivityManager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+    // broadcasting
+    private void broadcastRegistation() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(SessionService.ACTION_LOGIN);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mBound) {
+                    if (intent.getBooleanExtra(SessionService.EXTRA_LOGIN_SUCCESS, false)) {
+                        mSessionService.cacheLogin(mGoogleSignInAccount);
+                        startActivity(mMainActivityIntent);
+                        finish();
+                    } else {
+                        if (!mLoginFailedSnackbar.isShown()) mLoginFailedSnackbar.show();
+                    }
+                } else {
+                    Log.wtf(TAG, new IllegalStateException("Not bound to SessionService"));
+                }
+            }
+        };
+
+        registerReceiver(mBroadcastReceiver, intentFilter);
     }
 }
