@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -117,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
             unbindService(mServiceConnection);
             mBound = false;
         }
-        if (mBroadcastReceiver != null) unregisterReceiver(mBroadcastReceiver);
+        if (mBroadcastReceiver != null) LocalBroadcastManager.getInstance(LoginActivity.this).unregisterReceiver(mBroadcastReceiver);
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
@@ -194,6 +195,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        registerReceiver(mBroadcastReceiver, intentFilter);
+        LocalBroadcastManager.getInstance(LoginActivity.this).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 }

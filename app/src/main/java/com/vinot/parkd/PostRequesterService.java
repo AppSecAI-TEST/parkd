@@ -1,34 +1,29 @@
 package com.vinot.parkd;
 
-import android.app.Activity;
+import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 
-public class PostRequester extends Activity {
+public class PostRequesterService extends Service {
 
-    private static final String TAG = PostRequester.class.getSimpleName();
+    private static final String TAG = PostRequesterService.class.getSimpleName();
 
-    public static final String ACTION_POST_COMPLETED = PostRequester.class.getCanonicalName() + ".ACTION_POST_COMPLETED";
-    public static final String EXTRA_SUCCESS = PostRequester.class.getCanonicalName() + ".EXTRA_SUCCESS";
+    public static final String ACTION_POST_COMPLETED = PostRequesterService.class.getCanonicalName() + ".ACTION_POST_COMPLETED";
+    public static final String EXTRA_SUCCESS = PostRequesterService.class.getCanonicalName() + ".EXTRA_SUCCESS";
 
     private URL mUrl;
     private Map<String, Object> mParams;
-
-    public PostRequester(String url, Map<String, Object> params) {
-        try {
-            this.mUrl = new URL(url);
-            this.mParams = params;
-        } catch (IOException e) { Log.wtf(TAG, e); }
-    }
 
     /**
      * Produce byte array to be written to the output stream of a HttpUrlConnection, to perform
@@ -50,14 +45,27 @@ public class PostRequester extends Activity {
         return postData.toString().getBytes("UTF-8");
     }
 
-    /**
-     * Perform the a post request with this PostRequester's URL and POST parameters.
-     *
-     * When the post is completed, fire off a broadcast indicating success or failure.
-     */
-    public void performPostRequest() {
-        new PerformPostTask().execute();
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent.getAction().equals(SessionService.ACTION_POST_REQUEST)) {
+            try {
+                mUrl = new URL(intent.getStringExtra(SessionService.EXTRA_URL));
+                mParams = (Map) intent.getSerializableExtra(SessionService.EXTRA_PARAMS);
+            } catch (MalformedURLException | ClassCastException e) {
+                Log.wtf(TAG, e);
+            }
+
+            new PerformPostTask().execute();
+        } else {
+            Log.wtf(TAG, "PostRequesterService started with wrong action in intent.");
+            stopSelf();
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) { return null; }
 
     private class PerformPostTask extends AsyncTask<Void, Void, Boolean> {
         private final int READ_TIMEOUT = 10000; /* milliseconds */
@@ -69,6 +77,8 @@ public class PostRequester extends Activity {
             try {
                 byte[] postDataBytes = producePostRequestBytes(mParams);
 
+                // todo the logic below is dependent on the server functioning as it should
+                /*
                 conn = (HttpURLConnection) mUrl.openConnection();
                 conn.setReadTimeout(READ_TIMEOUT);
                 conn.setConnectTimeout(CONNECT_TIMEOUT);
@@ -81,11 +91,13 @@ public class PostRequester extends Activity {
                 conn.setDoOutput(true);
                 conn.getOutputStream().write(postDataBytes);
 
-                Log.d(TAG, PostRequester.this.getString(R.string.http_response, mUrl.toString(), conn.getResponseCode()));
+                Log.d(TAG, PostRequesterService.this.getString(R.string.http_response, mUrl.toString(), conn.getResponseCode()));
                 Log.d(TAG, conn.getInputStream().toString());
+                */
 
                 // todo logic for getting the server's response after the post request
                 // todo this might involve CookieManager
+
                 return true;
             } catch (java.io.IOException e) {
                 Log.wtf(TAG, e);
@@ -100,7 +112,9 @@ public class PostRequester extends Activity {
             super.onPostExecute(postResult);
             Intent intent = new Intent(ACTION_POST_COMPLETED);
             intent.putExtra(EXTRA_SUCCESS, postResult);
-            LocalBroadcastManager.getInstance(PostRequester.this).sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(PostRequesterService.this).sendBroadcast(intent);
+
+            stopSelf();
         }
     }
 }
