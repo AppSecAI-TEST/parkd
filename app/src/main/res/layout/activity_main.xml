@@ -7,40 +7,33 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/main_activity_toolbar_bottom"
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:alpha="100.0"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
-            <Button
-                android:id="@+id/button_launch_activity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_enter_location_pin"
-                android:background="@color/colorPrimary"
-                android:shadowColor="@color/colorPrimary"/>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:elevation="4dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+                <Button
+                    android:id="@+id/button_launch_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_enter_location_pin"
+                    android:textColor="@android:color/white"
+                    android:background="@color/colorPrimary"
+                    android:shadowColor="@color/colorPrimary"/>
             </android.support.v7.widget.Toolbar>
 
-    </android.support.design.widget.AppBarLayout>
+        <include layout="@layout/content_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    <include layout="@layout/content_main"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/main_activity_toolbar_bottom" />
-
-</RelativeLayout>
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
