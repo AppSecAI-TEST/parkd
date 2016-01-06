@@ -1,19 +1,19 @@
 package com.vinot.parkd;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 
-public class SplashScreenActivity extends AppCompatActivity {
+public class SplashScreenActivity extends SessionAwareActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
-//    private final int SPLASH_TIME_OUT = 3000; // milliseconds
-    private final int SPLASH_TIME_OUT = 3000; // milliseconds
-
-    // manually control how the splash works; this is for debugging
-    private final boolean mTimerSplash = true;
+    private final boolean TIMER_SPLASH = false;
+    private final int SPLASH_TIME_OUT = 2500; // milliseconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +27,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         );
 
-        if (mTimerSplash) {
+        if (TIMER_SPLASH) {
             new Handler().postDelayed(
                     new Runnable() {
                         @Override
@@ -39,8 +39,23 @@ public class SplashScreenActivity extends AppCompatActivity {
                     SPLASH_TIME_OUT
             );
         } else {
-            // Code involving connecting to a network, or something more intensive that is
-            // not just based on a timer.
+            mServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    SplashScreenActivity.this.onServiceConnected(name, service);
+                    if (mBoundToSessionService) {
+                        Class c = (mSessionService.loggedIn()) ? MainActivity.class : LoginActivity.class;
+                        startActivity(new Intent(SplashScreenActivity.this, c));
+                        finish();
+                    } else {
+                        Log.wtf(TAG, "Did not successfully bind to SessionService");
+                    }
+                }
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    SplashScreenActivity.this.onServiceDisconnected(name);
+                }
+            };
         }
     }
 }

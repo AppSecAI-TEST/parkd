@@ -38,19 +38,26 @@ public class SessionAwareActivity extends AppCompatActivity {
     protected ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (service instanceof SessionService.SessionServiceBinder) {
-                mSessionService = ((SessionService.SessionServiceBinder) service).getBoundService();
-                Log.d(TAG, "Successfully bound to SessionService");
-                mBoundToSessionService = true;
-            } else {
-                Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of SessionService.HttpServiceBinder"));
-            }
+            SessionAwareActivity.this.onServiceConnected(name, service);
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mBoundToSessionService = false;
-            Log.wtf(TAG, "Unexpected disconnection from SessionService");
+            SessionAwareActivity.this.onServiceDisconnected(name);
         }
     };
+
+    protected void onServiceConnected(ComponentName name, IBinder service) {
+        if (service instanceof SessionService.SessionServiceBinder) {
+            mSessionService = ((SessionService.SessionServiceBinder) service).getBoundService();
+            Log.d(TAG, "Successfully bound to SessionService");
+            mBoundToSessionService = true;
+        } else {
+            Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of SessionService.HttpServiceBinder"));
+        }
+    }
+
+    protected void onServiceDisconnected(ComponentName name) {
+        mBoundToSessionService = false;
+        Log.wtf(TAG, "Unexpected disconnection from SessionService");
+    }
 }
