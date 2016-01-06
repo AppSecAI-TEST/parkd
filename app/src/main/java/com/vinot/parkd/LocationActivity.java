@@ -2,15 +2,16 @@ package com.vinot.parkd;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.Log;
@@ -34,7 +35,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, ServerRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -134,6 +135,105 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         return messages;
     }
 
+    /**
+     * Update this Activity's UI to reflect the state of a Location object.
+     * todo fix up the non-location-based UI updates in this method
+     *
+     * @param location
+     */
+    private void updateUserInterface(Location location) {
+        mLocation = location;
+        try {
+            final Button buttonPayment = (Button) findViewById(R.id.button_payment);
+            final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
+            final TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
+            final NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
+
+            setTitle(mLocation.getName());
+
+            ancillaryFields.setText(
+                    String.format(getString(R.string.activity_title_ancillary_fields),
+                            mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
+            );
+            ancillaryFields.setVisibility(View.VISIBLE);
+
+            findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
+
+            buttonPayment.setText(String.format(getString(R.string.button_payment), 0f));
+            buttonPayment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mBoundToSessionService) {
+                        if (mSessionService.loggedIn()) {
+                            int hourOfDay = timePicker.getHour();
+                            int minute = timePicker.getMinute();
+                            Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
+                            paymentActivityIntent.setAction(ACTION_PAYMENT);
+                            paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
+                            paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                            paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                            paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
+                            startActivity(paymentActivityIntent);
+                        } else {
+                            Snackbar loginSnackbar;
+                            loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
+                            loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // todo implement this as an activityForResult or using a dialogue box to login.
+                                    startActivity(new Intent(LocationActivity.this, LoginActivity.class));
+                                }
+                            });
+                            loginSnackbar.show();
+                        }
+                    } else {
+                        Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
+                    }
+                }
+            });
+
+            timePicker.setIs24HourView(true);
+            timePicker.setHour(0);
+            timePicker.setMinute(0); // todo set max time based on a Location property
+            timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+                @Override
+                public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                    float price = hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice();
+                    buttonPayment.setText(String.format(getString(R.string.button_payment), price));
+                }
+            });
+
+            numberPicker.setMaxValue(mLocation.getNumberOfParks());
+            numberPicker.setMinValue(1);
+
+            if (LocationActivity.this.mMap != null) LocationActivity.this.updateMap(mMap, mLocation);
+
+        } catch (NullPointerException e) {
+            Log.wtf(TAG, e);
+        }
+    }
+
+    /**
+     * This method will be done away with eventually; we shouldn't need to save the state, the state
+     * should be checkable via the server.
+     *
+     * We *might* use this method to check against a cache
+     */
+    private void saveState() {
+        SharedPreferences sharedPreferences = getSharedPreferences(
+                getString(R.string.sharedpreferences_location), Context.MODE_PRIVATE
+        );
+        // add the location to SharedPreferences
+    }
+
+    @Override
+    public void restoreState() {
+        SharedPreferences sharedPreferences = getSharedPreferences(
+                getString(R.string.sharedpreferences_location), Context.MODE_PRIVATE
+        );
+        // restore the location from SharedPreferences
+    }
+
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
         private final int READ_TIMEOUT = 10000; /* milliseconds */
         private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
@@ -156,74 +256,7 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         @Override
         protected void onPostExecute(Location downloadedLocation) {
             super.onPostExecute(downloadedLocation);
-            LocationActivity.this.mLocation = downloadedLocation;
-            try {
-                LocationActivity.this.setTitle(mLocation.getName());
-                TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
-                ancillaryFields.setText(
-                        String.format(getString(R.string.activity_title_ancillary_fields),
-                                mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
-                );
-                ancillaryFields.setVisibility(View.VISIBLE);
-
-                findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
-
-                final Button b = (Button) findViewById(R.id.button_payment);
-                final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
-                b.setText(String.format(getString(R.string.button_payment), 0f));
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mBoundToSessionService) {
-                            if (mSessionService.loggedIn())  {
-                                int hourOfDay = timePicker.getHour();
-                                int minute = timePicker.getMinute();
-                                Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                                paymentActivityIntent.setAction(ACTION_PAYMENT);
-                                paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
-                                paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
-                                paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                                paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
-                                startActivity(paymentActivityIntent);
-                            } else {
-                                Snackbar loginSnackbar;
-                                loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
-                                loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // todo implement this as an activityForResult or using a dialogue box to login.
-                                        startActivity(new Intent(LocationActivity.this, LoginActivity.class));
-                                    }
-                                });
-                                loginSnackbar.show();
-                            }
-                        } else {
-                            Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
-                        }
-                    }
-                });
-
-                timePicker.setIs24HourView(true);
-                timePicker.setHour(0);
-                timePicker.setMinute(0); // todo set max time based on a Location property
-                timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-                    @Override
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        float price = hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice();
-                        b.setText(String.format(getString(R.string.button_payment), price));
-                    }
-                });
-
-                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-                numberPicker.setMaxValue(mLocation.getNumberOfParks());
-                numberPicker.setMinValue(1);
-
-                if (LocationActivity.this.mMap != null) {
-                    LocationActivity.this.updateMap(mMap, mLocation);
-                }
-            } catch (NullPointerException e) {
-                Log.wtf(TAG, e);
-            }
+            updateUserInterface(downloadedLocation);
         }
 
         private Location downloadUrl(String url) throws NullPointerException {
