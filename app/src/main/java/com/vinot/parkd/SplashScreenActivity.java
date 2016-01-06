@@ -12,7 +12,6 @@ import android.view.View;
 public class SplashScreenActivity extends SessionAwareActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
-    private final boolean TIMER_SPLASH = false;
     private final int SPLASH_TIME_OUT = 2500; // milliseconds
 
     @Override
@@ -27,35 +26,37 @@ public class SplashScreenActivity extends SessionAwareActivity {
                         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         );
 
-        if (TIMER_SPLASH) {
-            new Handler().postDelayed(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity((new Intent(SplashScreenActivity.this, LoginActivity.class)));
-                            finish();
-                        }
-                    },
-                    SPLASH_TIME_OUT
-            );
-        } else {
-            mServiceConnection = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    SplashScreenActivity.this.onServiceConnected(name, service);
-                    if (mBoundToSessionService) {
-                        Class c = (mSessionService.loggedIn()) ? MainActivity.class : LoginActivity.class;
-                        startActivity(new Intent(SplashScreenActivity.this, c));
+        final Intent nextActivityIntent = new Intent(SplashScreenActivity.this, LoginActivity.class);
+
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(nextActivityIntent);
                         finish();
-                    } else {
-                        Log.wtf(TAG, "Did not successfully bind to SessionService");
                     }
+                },
+                SPLASH_TIME_OUT
+        );
+
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                SplashScreenActivity.this.onServiceConnected(name, service);
+                if (mBoundToSessionService) {
+                    if (mSessionService.loggedIn()) {
+                        // fixme It may take a long time to ascertain whether or not a user is
+                        // fixme logged in, so this may be better handled asynchronously.
+                        nextActivityIntent.setClass(SplashScreenActivity.this, MainActivity.class);
+                    }
+                } else {
+                    Log.wtf(TAG, "Did not successfully bind to SessionService");
                 }
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    SplashScreenActivity.this.onServiceDisconnected(name);
-                }
-            };
-        }
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                SplashScreenActivity.this.onServiceDisconnected(name);
+            }
+        };
     }
 }
