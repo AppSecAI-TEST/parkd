@@ -10,7 +10,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
 //    private final int SPLASH_TIME_OUT = 3000; // milliseconds
-    private final int SPLASH_TIME_OUT = 1; // milliseconds
+    private final int SPLASH_TIME_OUT = 3000; // milliseconds
 
     // manually control how the splash works; this is for debugging
     private final boolean mTimerSplash = true;

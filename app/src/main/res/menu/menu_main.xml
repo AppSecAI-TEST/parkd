@@ -10,13 +10,13 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_bump"
-        android:icon="@android:drawable/sym_def_app_icon"
+        android:icon="@drawable/ic_thumbs_up_down_white_24dp"
         android:orderInCategory="100"
         android:title="@string/action_bump"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_settings"
-        android:icon="@android:drawable/ic_menu_manage"
+        android:icon="@drawable/ic_settings_white_24dp"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom" />
