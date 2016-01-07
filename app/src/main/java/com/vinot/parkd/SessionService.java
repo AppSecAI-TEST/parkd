@@ -5,13 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.orhanobut.hawk.Hawk;
+import com.orhanobut.hawk.HawkBuilder;
+import com.orhanobut.hawk.LogLevel;
 
 import java.util.LinkedHashMap;
 
@@ -26,7 +28,6 @@ public class SessionService extends Service {
 
     IBinder mSessionServiceBinder = new SessionServiceBinder();
 
-    private SharedPreferences mSession;
     private BroadcastReceiver mBroadcastReceiver;
     private boolean mLoggingIn = false;
     private GoogleSignInAccount mGoogleSignInAccount;
@@ -40,19 +41,37 @@ public class SessionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSession = getSharedPreferences(
-                getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
-        );
+        Hawk.init(this)
+                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
+                .setStorage(HawkBuilder.newSharedPrefStorage(this))
+                .setLogLevel(LogLevel.FULL)
+                .setCallback(new HawkBuilder.Callback() {
+                    @Override
+                    public void onSuccess() {
+                      //todo proper implementation
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                      //todo proper implementation
+                    }
+                }).build();
         broadcastRegistation();
     }
 
     @Override
     public IBinder onBind(Intent intent) { return mSessionServiceBinder; }
 
+    public void cacheLogin() throws Exception {
+        Log.d(TAG, "Caching login and session details in local storage");
+        Hawk.put(getString(R.string.hawk_session_idtoken), mGoogleSignInAccount.getIdToken());
+        Hawk.put(getString(R.string.hawk_session_logged_in), true);
+        // todo further local storage logic (username, email, etc.)
+        // todo use CookieManager for something similar to this
+    }
+
     public class SessionServiceBinder extends Binder {
-        public SessionService getBoundService() {
-            return SessionService.this;
-        }
+        public SessionService getBoundService() { return SessionService.this; }
     }
 
     /**
@@ -75,29 +94,11 @@ public class SessionService extends Service {
         startService(postRequesterIntent);
     }
 
-    /**
-     * Once we know that we are authenticated with the Park'd server we can commit the session
-     * information to local storage (SharedPreferences).
-     */
-    private void cacheLogin() {
-        Log.d(TAG, "Caching login and session details in SharedPreferences");
-        mSession.edit()
-                .putString(
-                        getString(R.string.sharedpreferences_session_idtoken), mGoogleSignInAccount.getIdToken()
-                )
-                .putBoolean(
-                        getString(R.string.sharedpreferences_session_logged_in), true
-                )
-                .apply();
-        // todo further local storage logic (username, email, etc.)
-        // todo use CookieManager for something similar to this
-    }
-
     public boolean loggedIn() {
         // todo this should be logic affirming that we are authenticated with the server.
         // todo it will perform a check with the server that we are logged in, rather than relying
         // todo on cached information.
-        return mSession.getBoolean(getString(R.string.sharedpreferences_session_logged_in), false);
+        return Hawk.get(getString(R.string.hawk_session_logged_in), false);
     }
 
     // broadcasting
@@ -115,7 +116,11 @@ public class SessionService extends Service {
                 boolean success;
                 if (mLoggingIn) {
                     if (success = intent.getBooleanExtra(PostRequesterService.EXTRA_SUCCESS, false)) {
-                        cacheLogin();
+                        try {
+                            cacheLogin();
+                        } catch (Exception e) {
+                            Log.wtf(TAG, "Unable to save session information to local storage");
+                        }
                     }
                     Intent loginIntent = new Intent(ACTION_LOGIN);
                     loginIntent.putExtra(EXTRA_LOGIN_SUCCESS, success);

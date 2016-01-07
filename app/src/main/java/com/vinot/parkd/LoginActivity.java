@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,7 +27,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class LoginActivity extends SessionAwareActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
-    private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 507;
     private static final int RC_ACCESS_NETWORK_STATE = 128;
     private static final int RC_INTERNET = 26;
@@ -36,7 +34,7 @@ public class LoginActivity extends SessionAwareActivity {
     private Intent mMainActivityIntent;
     private ConnectivityManager mConnectivityManager;
     private BroadcastReceiver mBroadcastReceiver;
-    private GoogleSignInAccount mGoogleSignInAccount;
+    private GoogleApiClient mGoogleApiClient;
     private Snackbar mLoginFailedSnackbar;
 
     @Override
@@ -112,8 +110,7 @@ public class LoginActivity extends SessionAwareActivity {
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             if (mBoundToSessionService) {
-                mGoogleSignInAccount = result.getSignInAccount();
-                mSessionService.init(mGoogleSignInAccount);
+                mSessionService.init(result.getSignInAccount());
             } else {
                 Log.wtf(TAG, new IllegalStateException("Failed to bind instance of SessionService"));
             }

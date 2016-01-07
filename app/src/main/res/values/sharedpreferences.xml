@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="sharedpreferences_session">com.vinot.parkd.sharedpreferences_session</string>
-    <string name="sharedpreferences_session_idtoken">com.vinot.parkd.sharedpreferences_session_idtoken</string>
-    <string name="sharedpreferences_session_logged_in">com.vinot.parkd.sharedpreferences_session_logged_in</string>
-
-    <string name="hawk_location">com.vinot.parkd.hawk_location</string>
-</resources>
