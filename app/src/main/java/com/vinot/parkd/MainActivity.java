@@ -8,11 +8,16 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.orhanobut.hawk.Hawk;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +52,13 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_bump:
                 return true;
-            case R.id.action_clear_shared_preferences:
-                SharedPreferences sharedPreferences = getSharedPreferences(
-                        getString(R.string.sharedpreferences_session), Context.MODE_PRIVATE
-                );
-                sharedPreferences.edit().clear().apply();
+            case R.id.action_clear_data:
+                if (Hawk.isBuilt()) {
+                    Hawk.clear();
+                } else {
+                    Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
+                    SessionService.initHawk(this);
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }

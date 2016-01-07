@@ -7,10 +7,10 @@ import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.Log;
@@ -27,6 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.orhanobut.hawk.Hawk;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +35,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -52,9 +53,12 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
-        setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.activity_location_toolbar));
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // todo what happens the *very first time* the app is run?  What mLocation do we use then?
+        // todo this will mean mLocation is null... maybe we can just display the map of the nearest
+        // todo Location?
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
             NdefMessage messages[] = produceNdefMessages(getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
@@ -64,11 +68,17 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             } else {
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
             }
+        } else {
+            // Recover mLocation from storage, since the Activity was not initialised via an NFC tag.
+            try {
+                restoreStateFromLocal();
+                Log.d(TAG, "Successfully restored from local storage.");
+            } catch (Exception e) {
+                Log.wtf(TAG, e);
+            }
         }
 
         NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-        numberPicker.setMaxValue(10);
-        numberPicker.setMinValue(1);
         numberPicker.setFormatter(new NumberPicker.Formatter() {
             @Override
             public String format(int value) {
@@ -80,6 +90,16 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    protected void onStop() {
+        try {
+            saveStateToLocal();
+        } catch (Exception e) {
+            Log.wtf(TAG, "Failed to save mLocation to storage in onStop() method");
+        }
+        super.onStop();
     }
 
     /**
@@ -134,6 +154,110 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         return messages;
     }
 
+    /**
+     * Update this Activity's UI to reflect the state of a Location object.
+     * todo fix up the non-location-based UI updates in this method
+     *
+     * @param location
+     */
+    private void updateUserInterface(final Location location) {
+        try {
+            final Button buttonPayment = (Button) findViewById(R.id.button_payment);
+            final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
+            final TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
+            final NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
+
+            setTitle(location.getName());
+
+            ancillaryFields.setText(
+                    String.format(getString(R.string.activity_title_ancillary_fields),
+                            location.getSuburb(), location.getState(), location.getPostcode())
+            );
+            ancillaryFields.setVisibility(View.VISIBLE);
+
+            findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
+
+            buttonPayment.setText(String.format(getString(R.string.button_payment), 0f));
+            buttonPayment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mBoundToSessionService) {
+                        if (mSessionService.loggedIn()) {
+                            int hourOfDay = timePicker.getHour();
+                            int minute = timePicker.getMinute();
+                            Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
+                            paymentActivityIntent.setAction(ACTION_PAYMENT);
+                            paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
+                            paymentActivityIntent.putExtra(EXTRA_LOCATION, location);
+                            paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                            paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
+                            startActivity(paymentActivityIntent);
+                        } else {
+                            Snackbar loginSnackbar;
+                            loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
+                            loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // todo implement this as an activityForResult or using a dialogue box to login.
+                                    startActivity(new Intent(LocationActivity.this, LoginActivity.class));
+                                }
+                            });
+                            loginSnackbar.show();
+                        }
+                    } else {
+                        Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
+                    }
+                }
+            });
+
+            timePicker.setIs24HourView(true);
+            timePicker.setHour(0);
+            timePicker.setMinute(0); // todo set max time based on a Location property
+            timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+                @Override
+                public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                    float price = hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice();
+                    buttonPayment.setText(String.format(getString(R.string.button_payment), price));
+                }
+            });
+
+            numberPicker.setMaxValue(location.getNumberOfParks());
+            numberPicker.setMinValue(1);
+
+            if (LocationActivity.this.mMap != null) LocationActivity.this.updateMap(mMap, location);
+
+        } catch (NullPointerException e) {
+            Log.wtf(TAG, e);
+        }
+    }
+
+    @Override
+    public void restoreStateFromLocal() throws Exception {
+        if (Hawk.isBuilt()) {
+            mLocation = Hawk.get(getString(R.string.hawk_location), null);
+            if (mLocation != null) {
+                updateUserInterface(mLocation);
+            } else {
+                throw new NullPointerException("mLocation has been drawn from local storage as a null object");
+            }
+        } else {
+            throw new Exception(getString(R.string.hawk_not_built));
+        }
+    }
+
+    // todo think about what execptions exactly might be thrown here.  Are there any coming
+    // todo straight from Hawk?
+    @Override
+    public void saveStateToLocal() throws Exception {
+        if (Hawk.isBuilt()) {
+            Log.d(TAG, "Saving mLocation state to storage");
+            if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
+            Hawk.put(getString(R.string.hawk_location), mLocation);
+        } else {
+            throw new Exception(getString(R.string.hawk_not_built));
+        }
+    }
+
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
         private final int READ_TIMEOUT = 10000; /* milliseconds */
         private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
@@ -156,74 +280,8 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         @Override
         protected void onPostExecute(Location downloadedLocation) {
             super.onPostExecute(downloadedLocation);
-            LocationActivity.this.mLocation = downloadedLocation;
-            try {
-                LocationActivity.this.setTitle(mLocation.getName());
-                TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
-                ancillaryFields.setText(
-                        String.format(getString(R.string.activity_title_ancillary_fields),
-                                mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
-                );
-                ancillaryFields.setVisibility(View.VISIBLE);
-
-                findViewById(R.id.activity_location_linearlayout).setVisibility(View.VISIBLE);
-
-                final Button b = (Button) findViewById(R.id.button_payment);
-                final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
-                b.setText(String.format(getString(R.string.button_payment), 0f));
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mBoundToSessionService) {
-                            if (mSessionService.loggedIn())  {
-                                int hourOfDay = timePicker.getHour();
-                                int minute = timePicker.getMinute();
-                                Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                                paymentActivityIntent.setAction(ACTION_PAYMENT);
-                                paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
-                                paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
-                                paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                                paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
-                                startActivity(paymentActivityIntent);
-                            } else {
-                                Snackbar loginSnackbar;
-                                loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
-                                loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // todo implement this as an activityForResult or using a dialogue box to login.
-                                        startActivity(new Intent(LocationActivity.this, LoginActivity.class));
-                                    }
-                                });
-                                loginSnackbar.show();
-                            }
-                        } else {
-                            Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
-                        }
-                    }
-                });
-
-                timePicker.setIs24HourView(true);
-                timePicker.setHour(0);
-                timePicker.setMinute(0); // todo set max time based on a Location property
-                timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-                    @Override
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        float price = hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice();
-                        b.setText(String.format(getString(R.string.button_payment), price));
-                    }
-                });
-
-                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-                numberPicker.setMaxValue(mLocation.getNumberOfParks());
-                numberPicker.setMinValue(1);
-
-                if (LocationActivity.this.mMap != null) {
-                    LocationActivity.this.updateMap(mMap, mLocation);
-                }
-            } catch (NullPointerException e) {
-                Log.wtf(TAG, e);
-            }
+            mLocation = downloadedLocation;
+            updateUserInterface(mLocation);
         }
 
         private Location downloadUrl(String url) throws NullPointerException {

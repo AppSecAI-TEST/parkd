@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hawk_session_idtoken">com.vinot.parkd.hawk_session_idtoken</string>
+    <string name="hawk_session_logged_in">com.vinot.parkd.hawk_session_logged_in</string>
+
+    <string name="hawk_location">com.vinot.parkd.hawk_location</string>
+
+    <string name="hawk_not_built">"Hawk is not built!"</string>
+</resources>
