@@ -28,6 +28,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.orhanobut.hawk.Hawk;
+import com.orhanobut.hawk.HawkBuilder;
+import com.orhanobut.hawk.LogLevel;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,12 +53,24 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
     //private byte[] mTagId = null;
 
     @Override
+    protected void onStop() {
+        saveState();
+        super.onStop();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        HawkBuilder h = Hawk.init(this)
+                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
+                .setStorage(HawkBuilder.newSharedPrefStorage(this))
+                .setLogLevel(LogLevel.FULL);
+
+        // todo what happens the *very first time* the app is run?  What mLocation do we use then?
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
             NdefMessage messages[] = produceNdefMessages(getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
@@ -65,6 +80,22 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             } else {
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
             }
+            h.build();
+        } else {
+            // Recover mLocation from storage, since we Activity was not initialised via an NFC tag.
+            h.setCallback(new HawkBuilder.Callback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Successfully initialised Hawk");
+                    if (restoreState()) Log.d(TAG, "Successfully restored mLocation");
+                    else Log.wtf(TAG, "Failed to restore mLocation");
+                }
+
+                @Override
+                public void onFail(Exception e) {
+                    Log.wtf(TAG, e);
+                }
+            }).build();
         }
 
         NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
@@ -220,18 +251,19 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
      * We *might* use this method to check against a cache
      */
     private void saveState() {
-        SharedPreferences sharedPreferences = getSharedPreferences(
-                getString(R.string.sharedpreferences_location), Context.MODE_PRIVATE
-        );
-        // add the location to SharedPreferences
+        Log.d(TAG, "Saving mLocation state to storage");
+        if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
+        Hawk.put(getString(R.string.hawk_location), mLocation);
     }
 
     @Override
-    public void restoreState() {
-        SharedPreferences sharedPreferences = getSharedPreferences(
-                getString(R.string.sharedpreferences_location), Context.MODE_PRIVATE
-        );
-        // restore the location from SharedPreferences
+    public boolean restoreState() {
+        mLocation = Hawk.get(getString(R.string.hawk_location), null);
+        if (mLocation != null) {
+            updateUserInterface(mLocation);
+            return true;
+        }
+        return false;
     }
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {

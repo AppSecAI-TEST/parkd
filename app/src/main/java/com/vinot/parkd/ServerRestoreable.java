@@ -11,6 +11,8 @@ public interface ServerRestoreable {
     /**
      * Restore the state of a component, either by via some server interaction or from local
      * storage.
+     *
+     * @return true if successful, else false
      */
-    void restoreState();
+    boolean restoreState();
 }
