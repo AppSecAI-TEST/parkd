@@ -2,7 +2,6 @@ package com.vinot.parkd;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -38,7 +37,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, ServerRestoreable {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -53,24 +52,20 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
     //private byte[] mTagId = null;
 
     @Override
-    protected void onStop() {
-        saveState();
-        super.onStop();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
-        setSupportActionBar((Toolbar) findViewById(R.id.location_activity_toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.activity_location_toolbar));
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        HawkBuilder h = Hawk.init(this)
+        HawkBuilder hawkBuilder = Hawk.init(this)
                 .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
                 .setStorage(HawkBuilder.newSharedPrefStorage(this))
                 .setLogLevel(LogLevel.FULL);
 
         // todo what happens the *very first time* the app is run?  What mLocation do we use then?
+        // todo this will mean mLocation is null... maybe we can just display the map of the nearest
+        // todo Location?
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Tag detected");
             NdefMessage messages[] = produceNdefMessages(getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
@@ -80,27 +75,27 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             } else {
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
             }
-            h.build();
         } else {
-            // Recover mLocation from storage, since we Activity was not initialised via an NFC tag.
-            h.setCallback(new HawkBuilder.Callback() {
+            // Recover mLocation from storage, since the Activity was not initialised via an NFC tag.
+            hawkBuilder.setCallback(new HawkBuilder.Callback() {
                 @Override
                 public void onSuccess() {
                     Log.d(TAG, "Successfully initialised Hawk");
-                    if (restoreState()) Log.d(TAG, "Successfully restored mLocation");
-                    else Log.wtf(TAG, "Failed to restore mLocation");
+                    try {
+                        restoreStateFromLocal();
+                        Log.d(TAG, "Successfully restored from local storage.");
+                    } catch (Exception e) {
+                        Log.wtf(TAG, e);
+                    }
                 }
-
                 @Override
-                public void onFail(Exception e) {
-                    Log.wtf(TAG, e);
-                }
-            }).build();
+                public void onFail(Exception e) { Log.wtf(TAG, e); }
+            });
         }
 
+        hawkBuilder.build();
+
         NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
-        numberPicker.setMaxValue(10);
-        numberPicker.setMinValue(1);
         numberPicker.setFormatter(new NumberPicker.Formatter() {
             @Override
             public String format(int value) {
@@ -112,6 +107,16 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    protected void onStop() {
+        try {
+            saveStateToLocal();
+        } catch (Exception e) {
+            Log.wtf(TAG, "Failed to save mLocation to storage in onStop() method");
+        }
+        super.onStop();
     }
 
     /**
@@ -172,19 +177,18 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
      *
      * @param location
      */
-    private void updateUserInterface(Location location) {
-        mLocation = location;
+    private void updateUserInterface(final Location location) {
         try {
             final Button buttonPayment = (Button) findViewById(R.id.button_payment);
             final TimePicker timePicker = (TimePicker) findViewById(R.id.timepicker);
             final TextView ancillaryFields = (TextView) findViewById(R.id.location_activity_title_ancillary_fields);
             final NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
 
-            setTitle(mLocation.getName());
+            setTitle(location.getName());
 
             ancillaryFields.setText(
                     String.format(getString(R.string.activity_title_ancillary_fields),
-                            mLocation.getSuburb(), mLocation.getState(), mLocation.getPostcode())
+                            location.getSuburb(), location.getState(), location.getPostcode())
             );
             ancillaryFields.setVisibility(View.VISIBLE);
 
@@ -200,8 +204,8 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
                             int minute = timePicker.getMinute();
                             Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
                             paymentActivityIntent.setAction(ACTION_PAYMENT);
-                            paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice());
-                            paymentActivityIntent.putExtra(EXTRA_LOCATION, mLocation);
+                            paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
+                            paymentActivityIntent.putExtra(EXTRA_LOCATION, location);
                             paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
                             paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
                             startActivity(paymentActivityIntent);
@@ -229,41 +233,38 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                 @Override
                 public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                    float price = hourOfDay * mLocation.getCurrentPrice() + (minute / 60f) * mLocation.getCurrentPrice();
+                    float price = hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice();
                     buttonPayment.setText(String.format(getString(R.string.button_payment), price));
                 }
             });
 
-            numberPicker.setMaxValue(mLocation.getNumberOfParks());
+            numberPicker.setMaxValue(location.getNumberOfParks());
             numberPicker.setMinValue(1);
 
-            if (LocationActivity.this.mMap != null) LocationActivity.this.updateMap(mMap, mLocation);
+            if (LocationActivity.this.mMap != null) LocationActivity.this.updateMap(mMap, location);
 
         } catch (NullPointerException e) {
             Log.wtf(TAG, e);
         }
     }
 
-    /**
-     * This method will be done away with eventually; we shouldn't need to save the state, the state
-     * should be checkable via the server.
-     *
-     * We *might* use this method to check against a cache
-     */
-    private void saveState() {
-        Log.d(TAG, "Saving mLocation state to storage");
-        if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
-        Hawk.put(getString(R.string.hawk_location), mLocation);
-    }
-
     @Override
-    public boolean restoreState() {
+    public void restoreStateFromLocal() throws Exception {
         mLocation = Hawk.get(getString(R.string.hawk_location), null);
         if (mLocation != null) {
             updateUserInterface(mLocation);
-            return true;
+        } else {
+            throw new NullPointerException("mLocation has been drawn from local storage as a null object");
         }
-        return false;
+    }
+
+    // todo think about what execptions exactly might be thrown here.  Are there any coming
+    // todo straight from Hawk?
+    @Override
+    public void saveStateToLocal() throws Exception {
+        Log.d(TAG, "Saving mLocation state to storage");
+        if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
+        Hawk.put(getString(R.string.hawk_location), mLocation);
     }
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
@@ -288,7 +289,8 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         @Override
         protected void onPostExecute(Location downloadedLocation) {
             super.onPostExecute(downloadedLocation);
-            updateUserInterface(downloadedLocation);
+            mLocation = downloadedLocation;
+            updateUserInterface(mLocation);
         }
 
         private Location downloadUrl(String url) throws NullPointerException {
