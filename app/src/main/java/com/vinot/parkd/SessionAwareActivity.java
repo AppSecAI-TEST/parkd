@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,7 +14,13 @@ import android.util.Log;
  */
 public abstract class SessionAwareActivity extends AppCompatActivity {
 
-    private static String TAG = SessionAwareActivity.class.getSimpleName();
+    private static String TAG;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TAG = this.getLocalClassName();
+    }
 
     @Override
     protected void onStart() {

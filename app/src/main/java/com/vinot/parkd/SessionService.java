@@ -41,21 +41,9 @@ public class SessionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Hawk.init(this)
-                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
-                .setStorage(HawkBuilder.newSharedPrefStorage(this))
-                .setLogLevel(LogLevel.FULL)
-                .setCallback(new HawkBuilder.Callback() {
-                    @Override
-                    public void onSuccess() {
-                      //todo proper implementation
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-                      //todo proper implementation
-                    }
-                }).build();
+        if (!Hawk.isBuilt()) {
+            initHawk(this);
+        }
         broadcastRegistation();
     }
 
@@ -131,5 +119,23 @@ public class SessionService extends Service {
         };
 
         LocalBroadcastManager.getInstance(SessionService.this).registerReceiver(mBroadcastReceiver, intentFilter);
+    }
+
+    public static void initHawk(Context context) {
+        Hawk.init(context)
+                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
+                .setStorage(HawkBuilder.newSharedPrefStorage(context))
+                .setLogLevel(LogLevel.FULL)
+                .setCallback(new HawkBuilder.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Hawk built.");
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Log.wtf(TAG, e);
+                    }
+                }).build();
     }
 }

@@ -28,8 +28,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.orhanobut.hawk.Hawk;
-import com.orhanobut.hawk.HawkBuilder;
-import com.orhanobut.hawk.LogLevel;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,11 +56,6 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
         setSupportActionBar((Toolbar) findViewById(R.id.activity_location_toolbar));
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        HawkBuilder hawkBuilder = Hawk.init(this)
-                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
-                .setStorage(HawkBuilder.newSharedPrefStorage(this))
-                .setLogLevel(LogLevel.FULL);
-
         // todo what happens the *very first time* the app is run?  What mLocation do we use then?
         // todo this will mean mLocation is null... maybe we can just display the map of the nearest
         // todo Location?
@@ -77,23 +70,13 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             }
         } else {
             // Recover mLocation from storage, since the Activity was not initialised via an NFC tag.
-            hawkBuilder.setCallback(new HawkBuilder.Callback() {
-                @Override
-                public void onSuccess() {
-                    Log.d(TAG, "Successfully initialised Hawk");
-                    try {
-                        restoreStateFromLocal();
-                        Log.d(TAG, "Successfully restored from local storage.");
-                    } catch (Exception e) {
-                        Log.wtf(TAG, e);
-                    }
-                }
-                @Override
-                public void onFail(Exception e) { Log.wtf(TAG, e); }
-            });
+            try {
+                restoreStateFromLocal();
+                Log.d(TAG, "Successfully restored from local storage.");
+            } catch (Exception e) {
+                Log.wtf(TAG, e);
+            }
         }
-
-        hawkBuilder.build();
 
         NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
         numberPicker.setFormatter(new NumberPicker.Formatter() {
@@ -250,11 +233,15 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
 
     @Override
     public void restoreStateFromLocal() throws Exception {
-        mLocation = Hawk.get(getString(R.string.hawk_location), null);
-        if (mLocation != null) {
-            updateUserInterface(mLocation);
+        if (Hawk.isBuilt()) {
+            mLocation = Hawk.get(getString(R.string.hawk_location), null);
+            if (mLocation != null) {
+                updateUserInterface(mLocation);
+            } else {
+                throw new NullPointerException("mLocation has been drawn from local storage as a null object");
+            }
         } else {
-            throw new NullPointerException("mLocation has been drawn from local storage as a null object");
+            throw new Exception(getString(R.string.hawk_not_built));
         }
     }
 
@@ -262,9 +249,13 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
     // todo straight from Hawk?
     @Override
     public void saveStateToLocal() throws Exception {
-        Log.d(TAG, "Saving mLocation state to storage");
-        if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
-        Hawk.put(getString(R.string.hawk_location), mLocation);
+        if (Hawk.isBuilt()) {
+            Log.d(TAG, "Saving mLocation state to storage");
+            if (mLocation == null) Log.w(TAG, "mLocation is being stored, although it is null");
+            Hawk.put(getString(R.string.hawk_location), mLocation);
+        } else {
+            throw new Exception(getString(R.string.hawk_not_built));
+        }
     }
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
