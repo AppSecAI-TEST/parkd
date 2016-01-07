@@ -19,11 +19,11 @@ import com.orhanobut.hawk.Hawk;
 public class MainActivity extends AppCompatActivity implements NfcDialogFragment.NfcDialogListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
-    private static final int RC_NFC_SETTINGS = 111;
 
     private NfcAdapter mNfcAdapter;
     private Snackbar mNfcDisabledSnackbar;
     private Intent mNfcSettingsIntent;
+    private boolean mIsReturningFromSettings = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
                 getString(R.string.nfc_settings), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startActivityForResult(mNfcSettingsIntent, RC_NFC_SETTINGS);
+                        startActivity(mNfcSettingsIntent);
+                        mIsReturningFromSettings = true;
                     }
                 }
         );
@@ -64,20 +65,20 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    protected void onResume() {
+        super.onResume();
+        if (mIsReturningFromSettings) {
+            // we must use this instead of startActivityForResult and onActivityResult
+            // as Settings do not support startActivityForResult flow.
+            if (!mNfcAdapter.isEnabled()) mNfcDisabledSnackbar.show();
+            else mNfcDisabledSnackbar.dismiss();
+        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case RC_NFC_SETTINGS:
-                if (!mNfcAdapter.isEnabled()) mNfcDisabledSnackbar.show();
-                else mNfcDisabledSnackbar.dismiss();
-                break;
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
@@ -105,7 +106,8 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        startActivityForResult(mNfcSettingsIntent, RC_NFC_SETTINGS);
+        startActivity(mNfcSettingsIntent);
+        mIsReturningFromSettings = true;
     }
 
     @Override
