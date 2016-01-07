@@ -19,6 +19,13 @@
     </string>
     <string name="nfc_not_enabled">NFC disabled.</string>
     <string name="nfc_settings">Settings</string>
+    <string name="nfc_request">Switch on NFC?</string>
+    <string name="nfc_request_message">
+        To get the best out of park\'d you\'re definitely going to want to switch on NFC
+    </string>
+    <string name="nfc_switch_on">Switch On</string>
+    <string name="nfc_disable">Disable All NFC Features</string>
+    <string name="nfc_cancel">Cancel</string>
 
     <string name="button_payment">pay now total $%1$.2f</string>
     <string name="button_code">CODE</string>
