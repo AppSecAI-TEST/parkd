@@ -17,7 +17,8 @@
         prompt point and slide it down slowly\n
         waiting for activation
     </string>
-    <string name="nfc_information">NFC INFORMATION</string>
+    <string name="nfc_not_enabled">NFC disabled.</string>
+    <string name="nfc_settings">Settings</string>
 
     <string name="button_payment">pay now total $%1$.2f</string>
     <string name="button_code">CODE</string>

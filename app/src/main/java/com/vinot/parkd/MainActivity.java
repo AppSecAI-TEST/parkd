@@ -1,9 +1,9 @@
 package com.vinot.parkd;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +18,10 @@ import com.orhanobut.hawk.Hawk;
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = MainActivity.class.getSimpleName();
+    private static final int RC_NFC_SETTINGS = 111;
+
+    private NfcAdapter mNfcAdapter;
+    private Snackbar mNfcDisabledSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +37,27 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (mNfcAdapter == null) {
+            // Device does not support NFC.  Disable all NFC features and/or warn about not being
+            // able to use many of the key features of the app.
+        } else {
+            if (!mNfcAdapter.isEnabled()) {
+                // todo need to be able to show this Snackbar any time the NFC settings change (i.e. use a callback)
+                mNfcDisabledSnackbar = Snackbar.make(
+                        findViewById(R.id.main_activity_coordinator_layout), getString(R.string.nfc_not_enabled), Snackbar.LENGTH_INDEFINITE
+                ).setAction(
+                        getString(R.string.nfc_settings), new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS), RC_NFC_SETTINGS);
+                            }
+                        }
+                );
+                startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS), RC_NFC_SETTINGS);
+            }
+        }
     }
 
     @Override
@@ -40,6 +65,20 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case RC_NFC_SETTINGS:
+                if (resultCode == RESULT_CANCELED) {
+                    if (!mNfcDisabledSnackbar.isShown()) {
+                        mNfcDisabledSnackbar.show();
+                    }
+                }
+                break;
+        }
     }
 
     @Override
@@ -59,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
                     SessionService.initHawk(this);
                 }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
