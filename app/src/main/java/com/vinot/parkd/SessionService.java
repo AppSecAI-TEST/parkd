@@ -50,7 +50,7 @@ public class SessionService extends Service {
     @Override
     public IBinder onBind(Intent intent) { return mSessionServiceBinder; }
 
-    public void cacheLogin() throws Exception {
+    private void cacheLogin() throws Exception {
         Log.d(TAG, "Caching login and session details in local storage");
         Hawk.put(getString(R.string.hawk_session_idtoken), mGoogleSignInAccount.getIdToken());
         Hawk.put(getString(R.string.hawk_session_logged_in), true);
@@ -59,34 +59,49 @@ public class SessionService extends Service {
     }
 
     public class SessionServiceBinder extends Binder {
-        public SessionService getBoundService() { return SessionService.this; }
-    }
 
-    /**
-     * Send user ID token to the Park'd server for validation.
-     *
-     * @param acct GoogleSignInAccount obtained after a successful Google login
-     */
-    public void init(GoogleSignInAccount acct) {
-        mGoogleSignInAccount = acct;
+        /**
+         * Set the Location that the logged in user has paid for and put time on.
+         */
+        public void setParkedLocation(Location location) {
+        }
 
-        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
-        params.put("idToken", mGoogleSignInAccount.getIdToken());
+        /**
+         * Retrieve the Location that the logged in user has paid for and put time on.
+         */
+        public Location getParkedLocation() { return null; }
 
-        mLoggingIn = true;
+        /**
+         * Is there a user currently logged in?
+         *
+         * @return true if a user is logged in, otherwise false
+         */
+        public boolean loggedIn() {
+            // todo this should be logic affirming that we are authenticated with the server.
+            // todo it will perform a check with the server that we are logged in, rather than relying
+            // todo on cached information.
+            return Hawk.get(getString(R.string.hawk_session_logged_in), false);
+        }
 
-        Intent postRequesterIntent = new Intent(SessionService.this, PostRequesterService.class);
-        postRequesterIntent.setAction(ACTION_POST_REQUEST);
-        postRequesterIntent.putExtra(EXTRA_PARAMS, params);
-        postRequesterIntent.putExtra(EXTRA_URL, getString(R.string.url_authenticate_user));
-        startService(postRequesterIntent);
-    }
+        /**
+         * Login to the park'd server
+         *
+         * @param googleSignInAccount the account to use for authenticating with the park'd server
+         */
+        public void login(GoogleSignInAccount googleSignInAccount) {
+            mGoogleSignInAccount = googleSignInAccount;
 
-    public boolean loggedIn() {
-        // todo this should be logic affirming that we are authenticated with the server.
-        // todo it will perform a check with the server that we are logged in, rather than relying
-        // todo on cached information.
-        return Hawk.get(getString(R.string.hawk_session_logged_in), false);
+            LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+            params.put("idToken", mGoogleSignInAccount.getIdToken());
+
+            mLoggingIn = true;
+
+            Intent postRequesterIntent = new Intent(SessionService.this, PostRequesterService.class);
+            postRequesterIntent.setAction(ACTION_POST_REQUEST);
+            postRequesterIntent.putExtra(EXTRA_PARAMS, params);
+            postRequesterIntent.putExtra(EXTRA_URL, getString(R.string.url_authenticate_user));
+            startService(postRequesterIntent);
+        }
     }
 
     // broadcasting

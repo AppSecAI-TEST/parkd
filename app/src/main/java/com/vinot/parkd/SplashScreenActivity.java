@@ -12,7 +12,7 @@ import android.view.View;
 public class SplashScreenActivity extends SessionAwareActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
-    private final int SPLASH_TIME_OUT = 2500; // milliseconds
+    private final int SPLASH_TIME_OUT = 2000; // milliseconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

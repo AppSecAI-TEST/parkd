@@ -41,7 +41,7 @@ public abstract class SessionAwareActivity extends AppCompatActivity {
 
     // binding
     protected boolean mBoundToSessionService = false;
-    protected SessionService mSessionService = null;
+    protected SessionService.SessionServiceBinder mSessionService = null;
     protected ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -55,7 +55,7 @@ public abstract class SessionAwareActivity extends AppCompatActivity {
 
     protected void onServiceConnected(ComponentName name, IBinder service) {
         if (service instanceof SessionService.SessionServiceBinder) {
-            mSessionService = ((SessionService.SessionServiceBinder) service).getBoundService();
+            mSessionService = (SessionService.SessionServiceBinder) service;
             Log.d(TAG, "Successfully bound to SessionService");
             mBoundToSessionService = true;
         } else {

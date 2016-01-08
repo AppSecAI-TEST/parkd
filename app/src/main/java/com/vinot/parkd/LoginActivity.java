@@ -110,7 +110,7 @@ public class LoginActivity extends SessionAwareActivity {
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             if (mBoundToSessionService) {
-                mSessionService.init(result.getSignInAccount());
+                mSessionService.login(result.getSignInAccount());
             } else {
                 Log.wtf(TAG, new IllegalStateException("Failed to bind instance of SessionService"));
             }

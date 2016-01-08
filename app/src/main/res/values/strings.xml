@@ -45,12 +45,12 @@
     <string name="activity_login_failed_login">Login failed.</string>
     <string name="login">login</string>
     <string name="activity_login_explanatory_text">
-        park\'d is the best way for you to make the\n
-        most of your parking experience in your\n
-        local area.  With innovative development\n
-        going in to helping you make sure you\n
-        know how much time you have left, and\n
-        what to do next when you\'re out\n
+        park\'d is the best way for you to make the
+        most of your parking experience in your
+        local area.  With innovative development
+        going in to helping you make sure you
+        know how much time you have left, and
+        what to do next when you\'re out
         shopping!
     </string>
 </resources>
