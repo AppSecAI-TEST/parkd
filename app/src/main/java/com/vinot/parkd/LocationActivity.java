@@ -40,7 +40,6 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
     public static final String EXTRA_MINUTE = LocationActivity.class.getCanonicalName() + ".EXTRA_MINUTE";
-    public static final String ACTION_PAYMENT = LocationActivity.class.getCanonicalName() + ".ACTION_PAYMENT";
 
     private static final String TAG = LocationActivity.class.getSimpleName();
     private static final float ZOOM_LEVEL = 15f;
@@ -186,7 +185,7 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
                             int hourOfDay = timePicker.getHour();
                             int minute = timePicker.getMinute();
                             Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                            paymentActivityIntent.setAction(ACTION_PAYMENT);
+                            paymentActivityIntent.setAction(PaymentActivity.ACTION_PAYMENT);
                             paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
                             paymentActivityIntent.putExtra(EXTRA_LOCATION, location);
                             paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
@@ -238,6 +237,10 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             if (mLocation != null) {
                 updateUserInterface(mLocation);
             } else {
+                Log.w(TAG, "mLocation has been drawn from local storage as a null object");
+                // todo either set the LocationActivity to display some default Locaiton (perhaps
+                // todo the user's current location) or invite them to return to scan a tag or
+                // todo enter a code (if they have no NFC, do not invite them to scan a tag)
                 throw new NullPointerException("mLocation has been drawn from local storage as a null object");
             }
         } else {

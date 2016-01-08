@@ -14,7 +14,7 @@ import android.util.Log;
  */
 public abstract class SessionAwareActivity extends AppCompatActivity {
 
-    private static String TAG;
+    protected static String TAG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

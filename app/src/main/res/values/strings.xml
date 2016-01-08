@@ -36,6 +36,7 @@
     <string name="add_time">Add time</string>
     <string name="find_my_car">Find my car</string>
     <string name="activity_payment_time_remaining">Time Remaining</string>
+    <string name="service_time_notification_title">park\'d</string>
 
     <string name="button_enter_location_pin">Enter location pin instead</string>
 
