@@ -109,8 +109,8 @@ public class LoginActivity extends SessionAwareActivity {
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            if (mBoundToSessionService) {
-                mSessionService.login(result.getSignInAccount());
+            if (mBoundToService) {
+                mService.login(result.getSignInAccount());
             } else {
                 Log.wtf(TAG, new IllegalStateException("Failed to bind instance of SessionService"));
             }
@@ -145,7 +145,7 @@ public class LoginActivity extends SessionAwareActivity {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (mBoundToSessionService) {
+                if (mBoundToService) {
                     if (intent.getBooleanExtra(SessionService.EXTRA_LOGIN_SUCCESS, false)) {
                         startActivity(mMainActivityIntent);
                         finish();

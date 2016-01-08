@@ -42,9 +42,9 @@ public class SplashScreenActivity extends SessionAwareActivity {
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                SplashScreenActivity.this.onServiceConnected(name, service);
-                if (mBoundToSessionService) {
-                    if (mSessionService.loggedIn()) {
+                SplashScreenActivity.this.onServiceConnected(service);
+                if (mBoundToService) {
+                    if (mService.loggedIn()) {
                         // fixme It may take a long time to ascertain whether or not a user is
                         // fixme logged in, so this may be better handled asynchronously.
                         nextActivityIntent.setClass(SplashScreenActivity.this, MainActivity.class);
@@ -55,7 +55,7 @@ public class SplashScreenActivity extends SessionAwareActivity {
             }
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                SplashScreenActivity.this.onServiceDisconnected(name);
+                SplashScreenActivity.this.onServiceDisconnected();
             }
         };
     }

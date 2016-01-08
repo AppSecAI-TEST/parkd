@@ -180,8 +180,8 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             buttonPayment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mBoundToSessionService) {
-                        if (mSessionService.loggedIn()) {
+                    if (mBoundToService) {
+                        if (mService.loggedIn()) {
                             int hourOfDay = timePicker.getHour();
                             int minute = timePicker.getMinute();
                             Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
