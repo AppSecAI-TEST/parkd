@@ -4,7 +4,6 @@ import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -29,7 +28,7 @@ public class TimerActivity extends PaymentTimerAwareActivity {
 
         if (getIntent().getAction() != null && getIntent().getAction().equals(PaymentTimerService.ACTION_PAYMENT_SUCCESS)) {
             Snackbar.make(
-                    findViewById(R.id.payment_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
+                    findViewById(R.id.timer_activity_coordinator_layout), R.string.activity_payment_success, Snackbar.LENGTH_LONG
             ).show();
         }
         mTimePicker.setHour(hour);

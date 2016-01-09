@@ -1,8 +1,8 @@
 package com.vinot.parkd;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -36,7 +36,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionBroadcastAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
+public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -100,25 +100,6 @@ public class LocationActivity extends SessionBroadcastAwareActivity implements O
             Log.wtf(TAG, "Failed to save mLocation to storage in onStop() method");
         }
         super.onStop();
-    }
-
-    @Override
-    protected IntentFilter getIntentFilter() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(PaymentTimerService.ACTION_PAYMENT_SUCCESS);
-        intentFilter.addAction(PaymentTimerService.ACTION_PAYMENT_FAIL);
-        return intentFilter;
-    }
-
-    @Override
-    protected void onBroadcastReceived(Context context, Intent intent) {
-        switch (intent.getAction()) {
-            case PaymentTimerService.ACTION_PAYMENT_SUCCESS:
-                startActivity(intent.setClass(LocationActivity.this, TimerActivity.class));
-                break;
-            case PaymentTimerService.ACTION_PAYMENT_FAIL:
-                break;
-        }
     }
 
     /**
@@ -200,31 +181,51 @@ public class LocationActivity extends SessionBroadcastAwareActivity implements O
             buttonPayment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mBoundToService) {
-                        if (mService.loggedIn()) {
-                            int hourOfDay = timePicker.getHour();
-                            int minute = timePicker.getMinute();
-                            Intent serviceIntent = new Intent(LocationActivity.this, PaymentTimerService.class);
-                            serviceIntent.setAction(PaymentTimerService.ACTION_PAYMENT);
-                            serviceIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
-                            serviceIntent.putExtra(EXTRA_LOCATION, location);
-                            serviceIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                            serviceIntent.putExtra(EXTRA_MINUTE, minute);
-                            startService(serviceIntent);
-                        } else {
-                            Snackbar loginSnackbar;
-                            loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
-                            loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    // todo implement this as an activityForResult or using a dialogue box to login.
-                                    startActivity(new Intent(LocationActivity.this, LoginActivity.class));
-                                }
-                            });
-                            loginSnackbar.show();
-                        }
-                    } else {
+                    if (!mBoundToService) {
                         Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
+                        return;
+                    }
+
+                    int hourOfDay = timePicker.getHour(), minute = timePicker.getMinute();
+                    float price = hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice();
+
+                    if (hourOfDay == 0 && minute == 0) {  // fixme be very careful with float comparisons to zero
+                        Snackbar.make(
+                                findViewById(R.id.location_activity_coordinator_layout), R.string.zero_time, Snackbar.LENGTH_INDEFINITE
+                        ).show();
+                        return;
+                    }
+
+                    if (mService.loggedIn()) {
+                        PendingIntent timerActivityPendingIntent = PendingIntent.getActivity(
+                                LocationActivity.this,
+                                0,
+                                new Intent(LocationActivity.this, TimerActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+
+                        Bundle b = new Bundle();
+                        b.putFloat(EXTRA_PRICE, price);
+                        b.putParcelable(EXTRA_LOCATION, location);
+                        b.putInt(EXTRA_HOUR, hourOfDay);
+                        b.putInt(EXTRA_MINUTE, minute);
+                        b.putParcelable(PaymentTimerService.EXTRA_PENDING_INTENT, timerActivityPendingIntent);
+
+                        Intent serviceIntent = new Intent(LocationActivity.this, PaymentTimerService.class);
+                        serviceIntent.setAction(PaymentTimerService.ACTION_PAYMENT).putExtras(b);
+
+                        startService(serviceIntent);
+                    } else {
+                        Snackbar loginSnackbar;
+                        loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
+                        loginSnackbar.setAction(R.string.login, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                // todo implement this as an activityForResult or using a dialogue box to login.
+                                startActivity(new Intent(LocationActivity.this, LoginActivity.class));
+                            }
+                        });
+                        loginSnackbar.show();
                     }
                 }
             });

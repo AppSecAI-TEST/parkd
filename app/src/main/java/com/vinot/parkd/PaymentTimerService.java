@@ -16,6 +16,7 @@ public class PaymentTimerService extends Service {
     public static final String ACTION_PAYMENT_FAIL = "com.vinot.parkd.PaymentTimerService.ACTION_PAYMENT_FAIL";
     public static final String ACTION_PAYMENT_SUCCESS = "com.vinot.parkd.PaymentTimerService.ACTION_PAYMENT_SUCCESS";
     public static final String ACTION_PAYMENT = PaymentTimerService.class.getCanonicalName() + ".ACTION_PAYMENT";
+    public static final String EXTRA_PENDING_INTENT = PaymentTimerService.class.getCanonicalName() + ".EXTRA_PENDING_INTENT";
     private static final int NOTIFICATION_PAYMENT_SERVICE = 282;
 
     private static final String TAG = "PaymentTimerService";
@@ -28,11 +29,11 @@ public class PaymentTimerService extends Service {
 
         if (intent.getAction() != null && intent.getAction().equals(ACTION_PAYMENT)) {
             float price = intent.getFloatExtra(LocationActivity.EXTRA_PRICE, 0f);
-            if (price <= 0f) {
+            if (price <= 0f) { // todo check time rather than price.  Location may allow time on a park... for free (?)
                 Log.wtf(TAG, "Price input for PaymentTimerService is equal to zero.  Expected non-zero");
                 stopSelf();
             } else {
-                (new PaymentTask()).execute(price);
+                (new PaymentTask(intent)).execute(price);
                 TESTING_LOCATION = intent.getParcelableExtra(LocationActivity.EXTRA_LOCATION);
             }
         }
@@ -81,6 +82,20 @@ public class PaymentTimerService extends Service {
     }
 
     private class PaymentTask extends AsyncTask<Float, Void, Boolean> {
+        private PendingIntent mPendingIntent;
+
+        public PaymentTask(final Intent intent) {
+            super();
+            if (intent.getExtras().containsKey(EXTRA_PENDING_INTENT)) {
+                Log.d(TAG, "Obtained pending intent");
+                mPendingIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
+            }
+            else {
+                Log.wtf(TAG, "PENDING INTENT NOT BEHAVING AS EXPECTED");
+            }
+
+        }
+
         @Override // todo this
         protected Boolean doInBackground(Float... price) {
             return performPayment(price[0]);
@@ -105,6 +120,13 @@ public class PaymentTimerService extends Service {
                     }
                 }, 5000);
                 sendToForeground();
+                if (mPendingIntent != null) {
+                    try {
+                        mPendingIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.wtf(TAG, e);
+                    }
+                }
             } else {
                 Log.wtf(TAG, "Payment failed");
             }

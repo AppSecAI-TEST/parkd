@@ -43,6 +43,7 @@
 
     <string name="activity_payment_time_up">Time\'s up!</string>
     <string name="not_logged_in">You need to authenticate before you can use Park\'d</string>
+    <string name="zero_time">Please enter a non-zero amount of time to park</string>
 
     <string name="activity_login_failed_login">Login failed.</string>
     <string name="login">login</string>
