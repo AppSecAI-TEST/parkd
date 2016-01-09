@@ -38,10 +38,11 @@
     <string name="find_my_car">Find my car</string>
     <string name="activity_payment_time_remaining">Time Remaining</string>
     <string name="service_time_notification_title">park\'d</string>
+    <string name="payment_time_notification">%1$02d:%2$02d remaining on your park\'d park</string>
 
     <string name="button_enter_location_pin">Enter location pin instead</string>
 
-    <string name="activity_payment_time_up">Time\'s up!</string>
+    <string name="activity_payment_time_up">%1$d : %2$d WHERE IS THIS STRING BEING USED?</string>
     <string name="not_logged_in">You need to authenticate before you can use Park\'d</string>
     <string name="zero_time">Please enter a non-zero amount of time to park</string>
 

@@ -9,6 +9,7 @@ import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.orhanobut.hawk.Hawk;
@@ -82,20 +83,8 @@ public class PaymentTimerService extends Service {
     }
 
     private void sendToForeground() {
-        Intent timerActivityIntent = new Intent(this, TimerActivity.class);
-        PendingIntent timerActivityPendingIntent = PendingIntent.getActivity(
-                this, 0, timerActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
-        // todo set the backstack correctly
-        NotificationCompat.Builder b = (new NotificationCompat.Builder(this))
-                .setSmallIcon(R.mipmap.ic_launcher_1)
-                .setContentTitle(getString(R.string.service_time_notification_title))
-                .setContentText("Swag YOLO")
-                .setContentIntent(timerActivityPendingIntent)
-                .setPriority(Notification.PRIORITY_DEFAULT);
-
-        // todo display the PaymentTimer's current time
-
+        NotificationCompat.Builder b = getNotificationBuilder()
+                .setContentText("park'd"); // todo set the initial content text correctly
         startForeground(NOTIFICATION_PAYMENT_SERVICE, b.build());
     }
 
@@ -136,10 +125,10 @@ public class PaymentTimerService extends Service {
             if (paymentWasSuccessful) {
                 PaymentTimerService.this.setLocation(this.mLocation);
 
+                sendToForeground();
+
                 mPaymentTimer = new PaymentTimer((mHour * 60 + mMinute) * PaymentTimer.MINUTE, PaymentTimer.MINUTE);
                 mPaymentTimer.start();
-
-                sendToForeground();
 
                 if (mPendingIntent != null) {
                     try {
@@ -161,18 +150,22 @@ public class PaymentTimerService extends Service {
     private void sendAnAlarm() { }//todo
 
     private class PaymentTimer extends CountDownTimer {
-
         public static final long HOUR = 3600000;
         public static final long MINUTE = 60000;
         private long mMillisUntilFinished;
+        private NotificationManagerCompat nm;
 
         public PaymentTimer(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
+            nm = NotificationManagerCompat.from(PaymentTimerService.this);
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
             this.mMillisUntilFinished = millisUntilFinished;
+            NotificationCompat.Builder b = getNotificationBuilder();
+            b.setContentText(getString(R.string.payment_time_notification, getHour(), getMinute()));
+            nm.notify(NOTIFICATION_PAYMENT_SERVICE, b.build());
         }
 
         public int getMinute() {
@@ -188,5 +181,18 @@ public class PaymentTimerService extends Service {
             PaymentTimerService.this.sendAnAlarm();
             PaymentTimerService.this.stopSelf();
         }
+    }
+
+    private NotificationCompat.Builder getNotificationBuilder() {
+        Intent timerActivityIntent = new Intent(this, TimerActivity.class);
+        PendingIntent timerActivityPendingIntent = PendingIntent.getActivity(
+                this, 0, timerActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        // todo set the backstack correctly
+        return (new NotificationCompat.Builder(this))
+                .setSmallIcon(R.mipmap.ic_launcher_1)
+                .setContentTitle(getString(R.string.service_time_notification_title))
+                .setContentIntent(timerActivityPendingIntent)
+                .setPriority(Notification.PRIORITY_DEFAULT);
     }
 }
