@@ -5,7 +5,7 @@ import android.os.IBinder;
 /**
  * To be extended for automatic binding to SessionService
  */
-public class SessionAwareActivity extends ServiceBoundActivity {
+public abstract class SessionAwareActivity extends ServiceBoundActivity {
 
     protected SessionService.SessionServiceBinder mService = null;
 

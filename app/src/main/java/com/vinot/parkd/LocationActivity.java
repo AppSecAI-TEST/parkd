@@ -2,6 +2,7 @@ package com.vinot.parkd;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NdefMessage;
@@ -35,7 +36,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
+public class LocationActivity extends SessionBroadcastAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";
@@ -99,6 +100,25 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
             Log.wtf(TAG, "Failed to save mLocation to storage in onStop() method");
         }
         super.onStop();
+    }
+
+    @Override
+    protected IntentFilter getIntentFilter() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(PaymentTimerService.ACTION_PAYMENT_SUCCESS);
+        intentFilter.addAction(PaymentTimerService.ACTION_PAYMENT_FAIL);
+        return intentFilter;
+    }
+
+    @Override
+    protected void onBroadcastReceived(Context context, Intent intent) {
+        switch (intent.getAction()) {
+            case PaymentTimerService.ACTION_PAYMENT_SUCCESS:
+                startActivity(intent.setClass(LocationActivity.this, TimerActivity.class));
+                break;
+            case PaymentTimerService.ACTION_PAYMENT_FAIL:
+                break;
+        }
     }
 
     /**
@@ -184,13 +204,13 @@ public class LocationActivity extends SessionAwareActivity implements OnMapReady
                         if (mService.loggedIn()) {
                             int hourOfDay = timePicker.getHour();
                             int minute = timePicker.getMinute();
-                            Intent paymentActivityIntent = new Intent(LocationActivity.this, PaymentActivity.class);
-                            paymentActivityIntent.setAction(PaymentActivity.ACTION_PAYMENT);
-                            paymentActivityIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
-                            paymentActivityIntent.putExtra(EXTRA_LOCATION, location);
-                            paymentActivityIntent.putExtra(EXTRA_HOUR, hourOfDay);
-                            paymentActivityIntent.putExtra(EXTRA_MINUTE, minute);
-                            startActivity(paymentActivityIntent);
+                            Intent serviceIntent = new Intent(LocationActivity.this, PaymentTimerService.class);
+                            serviceIntent.setAction(PaymentTimerService.ACTION_PAYMENT);
+                            serviceIntent.putExtra(EXTRA_PRICE, hourOfDay * location.getCurrentPrice() + (minute / 60f) * location.getCurrentPrice());
+                            serviceIntent.putExtra(EXTRA_LOCATION, location);
+                            serviceIntent.putExtra(EXTRA_HOUR, hourOfDay);
+                            serviceIntent.putExtra(EXTRA_MINUTE, minute);
+                            startService(serviceIntent);
                         } else {
                             Snackbar loginSnackbar;
                             loginSnackbar = Snackbar.make(findViewById(R.id.location_activity_coordinator_layout), R.string.not_logged_in, Snackbar.LENGTH_INDEFINITE);
