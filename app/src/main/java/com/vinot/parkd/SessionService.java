@@ -1,7 +1,5 @@
 package com.vinot.parkd;
 
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,9 +15,8 @@ import com.orhanobut.hawk.LogLevel;
 
 import java.util.LinkedHashMap;
 
-public class SessionService extends Service {
+public class SessionService extends BroadcastAwareService {
 
-    public static final String TAG = SessionService.class.getSimpleName();
     public static final String ACTION_LOGIN = SessionService.class.getCanonicalName() + ".ACTION_LOGIN";
     public static final String ACTION_POST_REQUEST = SessionService.class.getCanonicalName() + ".ACTION_LOGIN";
     public static final String EXTRA_LOGIN_SUCCESS = SessionService.class.getCanonicalName() + ".EXTRA_LOGIN_SUCCESS";
@@ -28,23 +25,41 @@ public class SessionService extends Service {
 
     IBinder mSessionServiceBinder = new SessionServiceBinder();
 
-    private BroadcastReceiver mBroadcastReceiver;
     private boolean mLoggingIn = false;
     private GoogleSignInAccount mGoogleSignInAccount;
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        if (mBroadcastReceiver != null) LocalBroadcastManager.getInstance(SessionService.this).unregisterReceiver(mBroadcastReceiver);
-        return super.onUnbind(intent);
+    public void onCreate() {
+        super.onCreate();
+        if (!Hawk.isBuilt()) initHawk(this);
+    }
+
+    /**
+     * If we are already in the process of logging in, then pass on a rebranded version of
+     * the PostRequesterService.ACTION_POST_COMPLETED intent.
+     */
+    @Override
+    protected void onBroadcastReceived(Context context, Intent intent) {
+
+        boolean success;
+        if (mLoggingIn) {
+            if (success = intent.getBooleanExtra(PostRequesterService.EXTRA_SUCCESS, false)) {
+                try {
+                    cacheLogin();
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Unable to save session information to local storage");
+                }
+            }
+            Intent loginIntent = new Intent(ACTION_LOGIN);
+            loginIntent.putExtra(EXTRA_LOGIN_SUCCESS, success);
+            LocalBroadcastManager.getInstance(SessionService.this).sendBroadcast(loginIntent);
+            mLoggingIn = false;
+        }
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        if (!Hawk.isBuilt()) {
-            initHawk(this);
-        }
-        broadcastRegistation();
+    protected IntentFilter getIntentFilter() {
+        return new IntentFilter(PostRequesterService.ACTION_POST_COMPLETED);
     }
 
     @Override
@@ -104,39 +119,8 @@ public class SessionService extends Service {
         }
     }
 
-    // broadcasting
-    private void broadcastRegistation() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(PostRequesterService.ACTION_POST_COMPLETED);
-
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            /**
-             * If we are already in the process of logging in, then pass on a rebranded version of
-             * the PostRequesterService.ACTION_POST_COMPLETED intent.
-             */
-            public void onReceive(Context context, Intent intent) {
-                boolean success;
-                if (mLoggingIn) {
-                    if (success = intent.getBooleanExtra(PostRequesterService.EXTRA_SUCCESS, false)) {
-                        try {
-                            cacheLogin();
-                        } catch (Exception e) {
-                            Log.wtf(TAG, "Unable to save session information to local storage");
-                        }
-                    }
-                    Intent loginIntent = new Intent(ACTION_LOGIN);
-                    loginIntent.putExtra(EXTRA_LOGIN_SUCCESS, success);
-                    LocalBroadcastManager.getInstance(SessionService.this).sendBroadcast(loginIntent);
-                    mLoggingIn = false;
-                }
-            }
-        };
-
-        LocalBroadcastManager.getInstance(SessionService.this).registerReceiver(mBroadcastReceiver, intentFilter);
-    }
-
     public static void initHawk(Context context) {
+        // todo move this somewhere more appropriate
         Hawk.init(context)
                 .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
                 .setStorage(HawkBuilder.newSharedPrefStorage(context))
