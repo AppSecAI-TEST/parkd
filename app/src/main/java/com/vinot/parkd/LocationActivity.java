@@ -74,7 +74,7 @@ public class LocationActivity extends SessionBroadcastAwareActivity implements O
                 restoreStateFromLocal();
                 Log.d(TAG, "Successfully restored from local storage.");
             } catch (Exception e) {
-                Log.wtf(TAG, e);
+                Log.w(TAG, e);
             }
         }
 
@@ -257,7 +257,6 @@ public class LocationActivity extends SessionBroadcastAwareActivity implements O
             if (mLocation != null) {
                 updateUserInterface(mLocation);
             } else {
-                Log.w(TAG, "mLocation has been drawn from local storage as a null object");
                 // todo either set the LocationActivity to display some default Locaiton (perhaps
                 // todo the user's current location) or invite them to return to scan a tag or
                 // todo enter a code (if they have no NFC, do not invite them to scan a tag)

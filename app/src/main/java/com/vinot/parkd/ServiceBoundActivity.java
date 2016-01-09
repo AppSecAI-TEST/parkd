@@ -50,7 +50,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
         }
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            ServiceBoundActivity.this.onServiceDisconnected();
+            ServiceBoundActivity.this.onServiceDisconnected(name);
         }
     };
 
@@ -61,12 +61,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
             Log.d(TAG, "Successfully bound to " + service.getClass().getSimpleName());
             mBoundToService = true;
         } else {
-            Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of " + service.getClass().getSimpleName() + "'s Binder"));
+            Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of " + service.getClass().getSimpleName()));
         }
     }
-    protected void onServiceDisconnected() {
+    protected void onServiceDisconnected(ComponentName name) {
         mBoundToService = false;
-        Log.wtf(TAG, "Unexpected disconnection from SessionService");
+        Log.wtf(TAG, "Unexpected disconnection from " + name.toShortString());
     }
 
     protected abstract void setBoundService(IBinder iBinder);

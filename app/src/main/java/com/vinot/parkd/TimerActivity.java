@@ -4,6 +4,7 @@ import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -42,7 +43,7 @@ public class TimerActivity extends PaymentTimerAwareActivity {
         );
         ancillaryFields.setVisibility(View.VISIBLE);
     }
-    
+
     @Override
     protected void onServiceConnected(IBinder service) {
         super.onServiceConnected(service);

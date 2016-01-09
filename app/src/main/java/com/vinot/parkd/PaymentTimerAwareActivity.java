@@ -17,7 +17,7 @@ public abstract class PaymentTimerAwareActivity extends ServiceBoundActivity {
 
     @Override
     protected final Class getBoundServiceClass() {
-        return SessionService.class;
+        return PaymentTimerService.class;
     }
 
     @Override
