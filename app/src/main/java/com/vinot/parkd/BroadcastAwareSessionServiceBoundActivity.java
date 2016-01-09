@@ -6,12 +6,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
-public abstract class SessionBroadcastAwareActivity extends SessionAwareActivity implements BroadcastAware {
+public abstract class BroadcastAwareSessionServiceBoundActivity extends SessionServiceBoundActivity implements BroadcastAware {
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            SessionBroadcastAwareActivity.this.onBroadcastReceived(context, intent);
+            BroadcastAwareSessionServiceBoundActivity.this.onBroadcastReceived(context, intent);
         }
     };
     private IntentFilter mIntentFilter;
@@ -31,7 +31,7 @@ public abstract class SessionBroadcastAwareActivity extends SessionAwareActivity
 
     @Override
     public void broadcastRegistration(IntentFilter intentFilter, BroadcastReceiver broadcastReceiver) {
-        LocalBroadcastManager.getInstance(SessionBroadcastAwareActivity.this).registerReceiver(broadcastReceiver, intentFilter);
+        LocalBroadcastManager.getInstance(BroadcastAwareSessionServiceBoundActivity.this).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override

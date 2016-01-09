@@ -7,7 +7,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 
-public class SplashScreenActivity extends SessionAwareActivity {
+public class SplashScreenActivity extends SessionServiceBoundActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
     private final int SPLASH_TIME_OUT = 2000; // milliseconds

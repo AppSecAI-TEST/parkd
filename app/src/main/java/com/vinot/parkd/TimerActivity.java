@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-public class TimerActivity extends PaymentTimerAwareActivity {
+public class TimerActivity extends PaymentTimerServiceBoundActivity {
 
     private TimePicker mTimePicker = null;
 

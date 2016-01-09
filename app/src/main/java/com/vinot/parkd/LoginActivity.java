@@ -1,7 +1,6 @@
 package com.vinot.parkd;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,7 +22,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-public class LoginActivity extends SessionBroadcastAwareActivity {
+public class LoginActivity extends BroadcastAwareSessionServiceBoundActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 507;

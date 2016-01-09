@@ -36,7 +36,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class LocationActivity extends SessionAwareActivity implements OnMapReadyCallback, LocallyRestoreable {
+public class LocationActivity extends SessionServiceBoundActivity implements OnMapReadyCallback, LocallyRestoreable {
     public static final String EXTRA_PRICE = LocationActivity.class.getCanonicalName() + ".EXTRA_PRICE";
     public static final String EXTRA_LOCATION = LocationActivity.class.getCanonicalName() + ".EXTRA_LOCATION";
     public static final String EXTRA_HOUR = LocationActivity.class.getCanonicalName() + ".EXTRA_HOUR";

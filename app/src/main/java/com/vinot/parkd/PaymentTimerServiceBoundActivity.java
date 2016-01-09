@@ -6,7 +6,7 @@ import android.os.IBinder;
 /**
  * To be extended for automatic binding to PaymentTimerService
  */
-public abstract class PaymentTimerAwareActivity extends ServiceBoundActivity {
+public abstract class PaymentTimerServiceBoundActivity extends ServiceBoundActivity {
 
     protected PaymentTimerService.PaymentTimerBinder mService = null;
 

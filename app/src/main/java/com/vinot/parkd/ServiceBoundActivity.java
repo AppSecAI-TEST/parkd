@@ -11,7 +11,7 @@ import android.util.Log;
 
 /**
  * To be extended for automatic binding to a Service.  See implementations such as
- * {@link SessionAwareActivity} for more hints on implementing.
+ * {@link SessionServiceBoundActivity} for more hints on implementing.
  *
  * Implementer must provide, on top of that which is required by inheritance,
  * an IBinder to interface with the Service and set it in the override of setBoundService.
