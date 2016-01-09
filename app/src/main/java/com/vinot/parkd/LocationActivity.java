@@ -205,10 +205,10 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
                         );
 
                         Bundle b = new Bundle();
-                        b.putFloat(EXTRA_PRICE, price);
-                        b.putParcelable(EXTRA_LOCATION, location);
-                        b.putInt(EXTRA_HOUR, hourOfDay);
-                        b.putInt(EXTRA_MINUTE, minute);
+                        b.putFloat(PaymentTimerService.EXTRA_PRICE, price);
+                        b.putParcelable(PaymentTimerService.EXTRA_LOCATION, location);
+                        b.putInt(PaymentTimerService.EXTRA_HOUR, hourOfDay);
+                        b.putInt(PaymentTimerService.EXTRA_MINUTE, minute);
                         b.putParcelable(PaymentTimerService.EXTRA_PENDING_INTENT, timerActivityPendingIntent);
 
                         Intent serviceIntent = new Intent(LocationActivity.this, PaymentTimerService.class);

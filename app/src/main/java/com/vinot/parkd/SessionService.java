@@ -63,7 +63,9 @@ public class SessionService extends BroadcastAwareService {
     }
 
     @Override
-    public IBinder onBind(Intent intent) { return mSessionServiceBinder; }
+    public IBinder onBind(Intent intent) {
+        return mSessionServiceBinder;
+    }
 
     private void cacheLogin() throws Exception {
         Log.d(TAG, "Caching login and session details in local storage");
@@ -75,16 +77,31 @@ public class SessionService extends BroadcastAwareService {
 
     public class SessionServiceBinder extends Binder {
 
+        private Location mLocation;
+
         /**
          * Set the Location that the logged in user has paid for and put time on.
          */
         public void setParkedLocation(Location location) {
+            if (Hawk.isBuilt()) {
+                Hawk.put(getString(R.string.hawk_currently_parked_location), location);
+            } else {
+                Log.wtf(TAG, "Hawk is not built");
+            }
         }
 
         /**
          * Retrieve the Location that the logged in user has paid for and put time on.
          */
-        public Location getParkedLocation() { return null; }
+        public Location getParkedLocation() {
+            if (mLocation == null) {
+                if (Hawk.isBuilt())
+                    mLocation = Hawk.get(getString(R.string.hawk_currently_parked_location));
+                else
+                    Log.wtf(TAG, getString(R.string.hawk_not_built));
+            }
+            return mLocation;
+        }
 
         /**
          * Is there a user currently logged in?

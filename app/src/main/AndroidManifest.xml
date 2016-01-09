@@ -65,6 +65,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".TimerActivity"
             android:parentActivityName=".LocationActivity">
@@ -72,6 +73,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".LocationActivity"/>
         </activity>
+
         <activity android:name=".LoginActivity"/>
 
         <service
@@ -82,6 +84,11 @@
             android:name=".PostRequesterService"
             android:enabled="true"
             android:exported="false"/>
+        <service
+            android:name=".PaymentTimerService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
 
         <!--
 The API key for Google Maps-based APIs is defined as a string resource.
@@ -95,11 +102,7 @@ You can define the keys for the debug and release targets in src/debug/ and src/
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key"/>
 
-        <service
-            android:name=".PaymentTimerService"
-            android:enabled="true"
-            android:exported="false">
-        </service>
+
     </application>
 
 </manifest>
