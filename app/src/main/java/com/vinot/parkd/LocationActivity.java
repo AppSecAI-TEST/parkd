@@ -103,7 +103,7 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
     }
 
     /**
-     * Manipulates the map once available.  This callback is triggered when the map is ready.
+     * Manipulates the map once available.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -282,14 +282,14 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
     }
 
     private class DownloadLocationTask extends AsyncTask<String, Void, Location> {
-        private final int READ_TIMEOUT = 10000; /* milliseconds */
-        private final int CONNECT_TIMEOUT = 15000; /* milliseconds */
-
-        private ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        private NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        private final int READ_TIMEOUT = 10000; // milliseconds
+        private final int CONNECT_TIMEOUT = 15000; // milliseconds
 
         @Override
         protected Location doInBackground(String... urls) {
+            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
             if (networkInfo != null && networkInfo.isConnected()) {
                 return downloadUrl(urls[0]);
             } else {

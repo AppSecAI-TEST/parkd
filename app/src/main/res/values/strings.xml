@@ -2,9 +2,9 @@
     <string name="app_name">Park\'d</string>
 
     <string name="web_host">10.0.0.71</string>
-    <string name="web_host_1">121.216.233.194</string>
+    <string name="web_host_1">parkd.no-ip.biz</string>
+    <string name="url_authenticate_user">http://parkd.no-ip.biz:3000/users/authenticate</string>
     <string name="server_client_id">996419448001-0e12a2qee2t5545sstc8oad87glhih29.apps.googleusercontent.com</string>
-    <string name="url_authenticate_user">http://121.216.233.194:3000/users/authenticate</string>
     <string name="http_response">The respone from %1$s is %2$d</string>
 
     <string name="action_settings">Settings</string>
