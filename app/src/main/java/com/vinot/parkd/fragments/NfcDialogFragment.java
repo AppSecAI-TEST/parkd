@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import com.vinot.parkd.R;
 
 public class NfcDialogFragment extends DialogFragment {
 

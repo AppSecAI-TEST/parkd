@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.services;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +10,8 @@ import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.orhanobut.hawk.Hawk;
-import com.orhanobut.hawk.HawkBuilder;
-import com.orhanobut.hawk.LogLevel;
+import com.vinot.parkd.Location;
+import com.vinot.parkd.R;
 
 import java.util.LinkedHashMap;
 
@@ -27,12 +27,6 @@ public class SessionService extends BroadcastAwareService {
 
     private boolean mLoggingIn = false;
     private GoogleSignInAccount mGoogleSignInAccount;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        if (!Hawk.isBuilt()) initHawk(this);
-    }
 
     /**
      * If we are already in the process of logging in, then pass on a rebranded version of
@@ -136,22 +130,4 @@ public class SessionService extends BroadcastAwareService {
         }
     }
 
-    public static void initHawk(Context context) {
-        // todo move this somewhere more appropriate
-        Hawk.init(context)
-                .setEncryptionMethod(HawkBuilder.EncryptionMethod.NO_ENCRYPTION)
-                .setStorage(HawkBuilder.newSharedPrefStorage(context))
-                .setLogLevel(LogLevel.FULL)
-                .setCallback(new HawkBuilder.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Hawk built.");
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        Log.wtf(TAG, e);
-                    }
-                }).build();
-    }
 }

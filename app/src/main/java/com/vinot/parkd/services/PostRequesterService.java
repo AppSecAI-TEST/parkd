@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.services;
 
 import android.app.Service;
 import android.content.Intent;

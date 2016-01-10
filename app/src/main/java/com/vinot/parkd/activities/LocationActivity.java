@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -29,6 +29,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.orhanobut.hawk.Hawk;
+import com.vinot.parkd.LocallyRestoreable;
+import com.vinot.parkd.Location;
+import com.vinot.parkd.R;
+import com.vinot.parkd.services.PaymentTimerService;
 
 import java.io.IOException;
 import java.io.InputStream;

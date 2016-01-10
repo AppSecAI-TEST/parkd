@@ -1,7 +1,9 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 
 import android.os.IBinder;
+
+import com.vinot.parkd.services.PaymentTimerService;
 
 /**
  * To be extended for automatic binding to PaymentTimerService

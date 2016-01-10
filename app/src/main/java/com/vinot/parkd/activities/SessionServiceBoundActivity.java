@@ -1,6 +1,8 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.os.IBinder;
+
+import com.vinot.parkd.services.SessionService;
 
 /**
  * To be extended for automatic binding to SessionService

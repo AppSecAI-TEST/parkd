@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.content.ComponentName;
 import android.content.Context;

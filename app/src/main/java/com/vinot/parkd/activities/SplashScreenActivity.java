@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+
+import com.vinot.parkd.R;
 
 public class SplashScreenActivity extends SessionServiceBoundActivity {
 

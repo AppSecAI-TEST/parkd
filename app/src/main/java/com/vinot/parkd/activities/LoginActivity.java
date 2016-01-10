@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.Manifest;
 import android.content.Context;
@@ -21,6 +21,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.vinot.parkd.R;
+import com.vinot.parkd.services.SessionService;
 
 public class LoginActivity extends BroadcastAwareSessionServiceBoundActivity {
 

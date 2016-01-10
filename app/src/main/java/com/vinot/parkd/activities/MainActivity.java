@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.content.Intent;
 import android.nfc.NfcAdapter;
@@ -15,6 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.orhanobut.hawk.Hawk;
+import com.vinot.parkd.fragments.NfcDialogFragment;
+import com.vinot.parkd.R;
+import com.vinot.parkd.services.SessionService;
 
 public class MainActivity extends AppCompatActivity implements NfcDialogFragment.NfcDialogListener {
 
@@ -92,12 +95,7 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
             case R.id.action_bump:
                 return true;
             case R.id.action_clear_data:
-                if (Hawk.isBuilt()) {
-                    Hawk.clear();
-                } else {
-                    Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
-                    SessionService.initHawk(this);
-                }
+                Hawk.clear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

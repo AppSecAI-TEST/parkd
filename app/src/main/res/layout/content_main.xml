@@ -13,7 +13,7 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     tools:showIn="@layout/activity_main"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <ImageView
         android:id="@+id/prompt_animation"

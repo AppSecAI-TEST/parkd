@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.parkd.activities;
 
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
@@ -7,6 +7,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.vinot.parkd.Location;
+import com.vinot.parkd.services.PaymentTimerService;
+import com.vinot.parkd.R;
 
 public class TimerActivity extends PaymentTimerServiceBoundActivity {
 
