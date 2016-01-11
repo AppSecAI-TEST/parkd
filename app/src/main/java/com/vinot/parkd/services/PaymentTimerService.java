@@ -159,9 +159,12 @@ public class PaymentTimerService extends Service {
         public static final long MINUTE = 60000;
         private long mMillisUntilFinished;
         private NotificationManagerCompat nm;
+        private int mTotalTime;
 
         public PaymentTimer(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
+            mTotalTime = (int) millisInFuture;
+
             nm = NotificationManagerCompat.from(PaymentTimerService.this);
         }
 
@@ -169,6 +172,7 @@ public class PaymentTimerService extends Service {
         public void onTick(long millisUntilFinished) {
             this.mMillisUntilFinished = millisUntilFinished;
             NotificationCompat.Builder b = getNotificationBuilder();
+            b.setProgress(mTotalTime, mTotalTime - (int) mMillisUntilFinished, false);
             b.setContentText(getString(R.string.payment_time_notification, getHour(), getMinute()));
             nm.notify(NOTIFICATION_PAYMENT_SERVICE, b.build());
         }
