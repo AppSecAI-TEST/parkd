@@ -185,7 +185,7 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
             buttonPayment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!mBoundToService) {
+                    if (!isBoundToService()) {
                         Log.wtf(TAG, "Not bound to SessionService when pressing payment button");
                         return;
                     }
