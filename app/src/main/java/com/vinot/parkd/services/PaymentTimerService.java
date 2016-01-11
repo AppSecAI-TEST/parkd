@@ -3,6 +3,7 @@ package com.vinot.parkd.services;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -189,10 +190,11 @@ public class PaymentTimerService extends Service {
 
     private NotificationCompat.Builder getNotificationBuilder() {
         Intent timerActivityIntent = new Intent(this, TimerActivity.class);
-        PendingIntent timerActivityPendingIntent = PendingIntent.getActivity(
-                this, 0, timerActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
-        // todo set the backstack correctly
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
+        taskStackBuilder
+                .addParentStack(TimerActivity.class)
+                .addNextIntent(timerActivityIntent);
+        PendingIntent timerActivityPendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         return (new NotificationCompat.Builder(this))
                 .setSmallIcon(R.mipmap.ic_launcher_1)
                 .setContentTitle(getString(R.string.service_time_notification_title))
