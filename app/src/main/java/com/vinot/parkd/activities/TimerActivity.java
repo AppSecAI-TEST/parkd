@@ -50,6 +50,11 @@ public class TimerActivity extends PaymentTimerServiceBoundActivity {
     @Override
     protected void onServiceConnected(IBinder service) {
         super.onServiceConnected(service);
-        updateUserInterface(mService.getLocation(), mService.getHour(), mService.getMinute());
+
+        updateUserInterface(
+                getBoundService().getLocation(),
+                getBoundService().getHour(),
+                getBoundService().getMinute()
+        );
     }
 }

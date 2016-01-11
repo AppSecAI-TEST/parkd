@@ -109,8 +109,8 @@ public class LoginActivity extends BroadcastAwareSessionServiceBoundActivity {
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            if (mBoundToService) {
-                mService.login(result.getSignInAccount());
+            if (isBoundToService()) {
+                getBoundService().login(result.getSignInAccount());
             } else {
                 Log.wtf(TAG, new IllegalStateException("Failed to bind instance of SessionService"));
             }

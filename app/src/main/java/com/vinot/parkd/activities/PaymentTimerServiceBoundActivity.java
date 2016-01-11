@@ -1,8 +1,5 @@
 package com.vinot.parkd.activities;
 
-
-import android.os.IBinder;
-
 import com.vinot.parkd.services.PaymentTimerService;
 
 /**
@@ -10,11 +7,9 @@ import com.vinot.parkd.services.PaymentTimerService;
  */
 public abstract class PaymentTimerServiceBoundActivity extends ServiceBoundActivity {
 
-    protected PaymentTimerService.PaymentTimerBinder mService = null;
-
     @Override
-    protected final void setBoundService(IBinder iBinder) {
-        mService =  (PaymentTimerService.PaymentTimerBinder) iBinder;
+    protected PaymentTimerService.PaymentTimerBinder getBoundService() {
+        return (PaymentTimerService.PaymentTimerBinder) mServiceBinder;
     }
 
     @Override

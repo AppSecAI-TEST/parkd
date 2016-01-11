@@ -4,26 +4,25 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 /**
- * To be extended for automatic binding to a Service.  See implementations such as
- * {@link SessionServiceBoundActivity} for more hints on implementing.
- *
- * Implementer must provide, on top of that which is required by inheritance,
- * an IBinder to interface with the Service and set it in the override of setBoundService.
+ * To be extended for automatic binding to a Service.
  */
 public abstract class ServiceBoundActivity extends AppCompatActivity {
 
     protected static String TAG;
+    protected Binder mServiceBinder = null;
+    private boolean mBoundToService = false;
 
     @Override
     protected void onStart() {
         super.onStart();
-        bindService(new Intent(this, getBoundServiceClass()), mServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService();
     }
 
     @Override
@@ -36,13 +35,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (mBoundToService) {
-            unbindService(mServiceConnection);
-            mBoundToService = false;
+            unbindService();
         }
     }
 
     // binding
-    protected boolean mBoundToService = false;
+
     protected ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -57,11 +55,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
     protected void onServiceConnected(IBinder service) {
         Class<IBinder> toBeCastTo = getBoundServiceBinderClass();
         if (toBeCastTo.isInstance(service)) {
-            setBoundService(toBeCastTo.cast(service));
+            mServiceBinder = (Binder) service;
             Log.d(TAG, "Successfully bound to " + service.getClass().getSimpleName());
             mBoundToService = true;
         } else {
-            Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of " + service.getClass().getSimpleName()));
+            Log.wtf(TAG, new ClassCastException("service IBinder is not an instance of " + toBeCastTo.getSimpleName()));
         }
     }
     protected void onServiceDisconnected(ComponentName name) {
@@ -69,8 +67,56 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
         Log.wtf(TAG, "Unexpected disconnection from " + name.toShortString());
     }
 
-    protected abstract void setBoundService(IBinder iBinder);
+    /**
+     * Wrapper around ContextWrapper.bindService to bind automatically to the Service we are supposed
+     * to be bound to.
+     * @return boolean that ContextWrapper.bindService returns
+     */
+    protected boolean bindService() {
+        return bindService(new Intent(this, getBoundServiceClass()), mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     * Wrapper around unbindService to unbind automatically from the Service we are supposed to be
+     * bound to.
+     */
+    protected void unbindService() {
+        unbindService(mServiceConnection);
+        mBoundToService = false;
+    }
+
+    @Override
+    public void unbindService(ServiceConnection conn) {
+        super.unbindService(conn);
+        mBoundToService = false;
+    }
+
+    /**
+     * Is Activity bound?
+     * @return if Activity is bound
+     */
+    protected final boolean isBoundToService() {
+        return mBoundToService;
+    }
+
+    /**
+     * Obtain the Binder that is being used to interface with the Service we are bound to.
+     * Inheriting classes ought to cast the Binder appropriately for their own Binder child class.
+     * @return Binder to Service
+     */
+    protected abstract Binder getBoundService();
+
+    /**
+     * To be used by inheriting abstract classes to specify the class of the Service being bound to
+     * @return class of Service being bound to
+     */
     protected abstract Class getBoundServiceClass();
+
+    /**
+     * To be used by inheriting abstract classes to specify the class of Binder being used for
+     * binding
+     * @return class of Binder
+     */
     protected abstract Class getBoundServiceBinderClass();
 
 }

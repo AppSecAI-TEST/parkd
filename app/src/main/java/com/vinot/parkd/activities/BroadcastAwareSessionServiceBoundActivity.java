@@ -16,12 +16,11 @@ public abstract class BroadcastAwareSessionServiceBoundActivity extends SessionS
             BroadcastAwareSessionServiceBoundActivity.this.onBroadcastReceived(context, intent);
         }
     };
-    private IntentFilter mIntentFilter;
+    private IntentFilter mIntentFilter = getIntentFilter();
 
     @Override
     protected void onStart() {
         super.onStart();
-        mIntentFilter = getIntentFilter();
         broadcastRegistration(mIntentFilter, mBroadcastReceiver);
     }
 

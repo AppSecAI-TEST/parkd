@@ -19,8 +19,8 @@ public class SplashScreenActivity extends SessionServiceBoundActivity {
     @Override
     protected void onServiceConnected(IBinder service) {
         super.onServiceConnected(service);
-        if (mBoundToService) {
-            if (mService.loggedIn()) {
+        if (isBoundToService()) {
+            if (getBoundService().loggedIn()) {
                 // fixme It may take a long time to ascertain whether or not a user is
                 // fixme logged in, so this may be better handled asynchronously.
                 mNextActivityIntent.setClass(SplashScreenActivity.this, MainActivity.class);

@@ -1,5 +1,6 @@
 package com.vinot.parkd.activities;
 
+import android.os.Binder;
 import android.os.IBinder;
 
 import com.vinot.parkd.services.SessionService;
@@ -9,11 +10,9 @@ import com.vinot.parkd.services.SessionService;
  */
 public abstract class SessionServiceBoundActivity extends ServiceBoundActivity {
 
-    protected SessionService.SessionServiceBinder mService = null;
-
     @Override
-    protected final void setBoundService(IBinder iBinder) {
-        mService = (SessionService.SessionServiceBinder) iBinder;
+    protected SessionService.SessionServiceBinder getBoundService() {
+        return (SessionService.SessionServiceBinder) mServiceBinder;
     }
 
     @Override

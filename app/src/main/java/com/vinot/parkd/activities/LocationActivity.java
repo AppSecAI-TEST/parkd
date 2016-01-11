@@ -200,7 +200,7 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
                         return;
                     }
 
-                    if (mService.loggedIn()) {
+                    if (isBoundToService() && getBoundService().loggedIn()) {
                         PendingIntent timerActivityPendingIntent = PendingIntent.getActivity(
                                 LocationActivity.this,
                                 0,
