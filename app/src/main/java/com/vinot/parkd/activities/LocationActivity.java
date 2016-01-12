@@ -76,12 +76,16 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
                 Log.wtf(TAG, "Malformed NDEF message on tag.");
             }
         } else {
-            // Recover mLocation from storage, since the Activity was not initialised via an NFC tag.
             try {
-                restoreStateFromLocal();
-                Log.d(TAG, "Successfully restored from local storage.");
+                if (thereIsSomethingToBeRestored()) {
+                    // Recover mLocation from storage, since the Activity was not initialised via an NFC tag.
+                    restoreStateFromLocal();
+                    Log.d(TAG, "Successfully restored from local storage.");
+                } else {
+                    // todo use default location or ask user to scan a tag
+                }
             } catch (Exception e) {
-                Log.w(TAG, e);
+                Log.wtf(TAG, e);
             }
         }
 
@@ -264,6 +268,15 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
         } catch (NullPointerException e) {
             Log.wtf(TAG, e);
         }
+    }
+
+    @Override
+    public boolean thereIsSomethingToBeRestored() throws Exception {
+        if (Hawk.isBuilt()) {
+            mLocation = Hawk.get(getString(R.string.hawk_location), null);
+            return mLocation != null;
+        }
+        throw new Exception(getString(R.string.hawk_not_built));
     }
 
     @Override
