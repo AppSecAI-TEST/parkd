@@ -58,7 +58,10 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         setSupportActionBar((Toolbar) findViewById(R.id.activity_location_toolbar));
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().hide();
+        }
 
         // todo what happens the *very first time* the app is run?  What mLocation do we use then?
         // todo this will mean mLocation is null... maybe we can just display the map of the nearest
@@ -172,6 +175,14 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
             final NumberPicker numberPicker = (NumberPicker) findViewById(R.id.numberpicker_park);
 
             setTitle(location.getName());
+            try {
+                if (!getSupportActionBar().isShowing()) {
+                    getSupportActionBar().show();
+                }
+            } catch (NullPointerException e) {
+                Log.wtf(TAG, e);
+            }
+
 
             ancillaryFields.setText(
                     String.format(getString(R.string.activity_title_ancillary_fields),
