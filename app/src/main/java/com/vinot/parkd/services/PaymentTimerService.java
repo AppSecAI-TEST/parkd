@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
+import android.media.RingtoneManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.CountDownTimer;
@@ -65,7 +66,7 @@ public class PaymentTimerService extends Service {
             throw new NullPointerException("PaymentTimer is null");
         }
 
-        public boolean hasTimeRemaining() throws NullPointerException{
+        public boolean hasTimeRemaining() throws NullPointerException {
             if (mPaymentTimer != null)
                 return mPaymentTimer.mMillisUntilFinished > 0;
             throw new NullPointerException("PaymentTimer is null");
@@ -85,12 +86,6 @@ public class PaymentTimerService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    private void sendToForeground() {
-        NotificationCompat.Builder b = getNotificationBuilder()
-                .setContentText("park'd"); // todo set the initial content text correctly
-        startForeground(NOTIFICATION_PAYMENT_SERVICE, b.build());
     }
 
     /**
@@ -130,8 +125,6 @@ public class PaymentTimerService extends Service {
             if (paymentWasSuccessful) {
                 PaymentTimerService.this.setLocation(this.mLocation);
 
-                sendToForeground();
-
                 mPaymentTimer = new PaymentTimer((mHour * 60 + mMinute) * PaymentTimer.MINUTE, PaymentTimer.MINUTE);
                 mPaymentTimer.start();
 
@@ -152,29 +145,43 @@ public class PaymentTimerService extends Service {
         }
     }
 
-    private void sendAnAlarm() { }//todo
-
+    /**
+     * As this class is written, it entirely controls whether the service comes to the foreground
+     * and performs all of the notification updates
+     */
     private class PaymentTimer extends CountDownTimer {
         public static final long HOUR = 3600000;
         public static final long MINUTE = 60000;
         private long mMillisUntilFinished;
         private NotificationManagerCompat nm;
         private int mTotalTime;
+        private NotificationCompat.Builder mNotificationBuilder;
 
         public PaymentTimer(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
-            mTotalTime = (int) millisInFuture;
 
+            Intent timerActivityIntent = new Intent(PaymentTimerService.this, TimerActivity.class);
+            TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(PaymentTimerService.this);
+            taskStackBuilder
+                    .addParentStack(TimerActivity.class)
+                    .addNextIntent(timerActivityIntent);
+            PendingIntent timerActivityPendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            mNotificationBuilder = new NotificationCompat.Builder(PaymentTimerService.this)
+                    .setSmallIcon(R.mipmap.ic_launcher_1)
+                    .setContentTitle(getString(R.string.service_time_notification_title))
+                    .setContentIntent(timerActivityPendingIntent)
+                    .setPriority(Notification.PRIORITY_DEFAULT);
+
+            mTotalTime = (int) millisInFuture;
+            mMillisUntilFinished = millisInFuture;
+            startForeground(NOTIFICATION_PAYMENT_SERVICE, getOngoingNotification(false));
             nm = NotificationManagerCompat.from(PaymentTimerService.this);
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
             this.mMillisUntilFinished = millisUntilFinished;
-            NotificationCompat.Builder b = getNotificationBuilder();
-            b.setProgress(mTotalTime, mTotalTime - (int) mMillisUntilFinished, false);
-            b.setContentText(getString(R.string.payment_time_notification, getHour(), getMinute()));
-            nm.notify(NOTIFICATION_PAYMENT_SERVICE, b.build());
+            nm.notify(NOTIFICATION_PAYMENT_SERVICE, getOngoingNotification(false));
         }
 
         public int getMinute() {
@@ -187,22 +194,26 @@ public class PaymentTimerService extends Service {
 
         @Override
         public void onFinish() {
-            PaymentTimerService.this.sendAnAlarm();
-            PaymentTimerService.this.stopSelf();
+            stopForeground(false);
+            nm.notify(NOTIFICATION_PAYMENT_SERVICE, getOngoingNotification(true));
+//            PaymentTimerService.this.stopSelf(); // will not actually stop until activity unbinds
+            // all activities unbind, the service will stop
+            // todo stop the service more deliberately
         }
-    }
 
-    private NotificationCompat.Builder getNotificationBuilder() {
-        Intent timerActivityIntent = new Intent(this, TimerActivity.class);
-        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-        taskStackBuilder
-                .addParentStack(TimerActivity.class)
-                .addNextIntent(timerActivityIntent);
-        PendingIntent timerActivityPendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        return (new NotificationCompat.Builder(this))
-                .setSmallIcon(R.mipmap.ic_launcher_1)
-                .setContentTitle(getString(R.string.service_time_notification_title))
-                .setContentIntent(timerActivityPendingIntent)
-                .setPriority(Notification.PRIORITY_DEFAULT);
+        private Notification getOngoingNotification(boolean finishing) {
+            if (finishing) {
+                return mNotificationBuilder
+                        .setProgress(100, 100, false)
+                        .setContentText("Time's up!")
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .build();
+            }
+            return mNotificationBuilder
+                    .setProgress(mTotalTime, 0, false)
+                    .setContentText(getString(R.string.payment_time_notification, getHour(), getMinute()))
+                    .build();
+
+        }
     }
 }
