@@ -1,7 +1,7 @@
 package com.vinot.parkd.activities;
 
 import com.vinot.parkd.services.SessionService;
-import com.vinot.library.activities.BroadcastAwareServiceBoundActivity;
+import com.tpor9095.library.activities.BroadcastAwareServiceBoundActivity;
 
 public abstract class BroadcastAwareSessionServiceBoundActivity extends BroadcastAwareServiceBoundActivity {
 

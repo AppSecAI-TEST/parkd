@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -18,9 +17,10 @@ import com.orhanobut.hawk.Hawk;
 import com.vinot.parkd.fragments.NfcDialogFragment;
 import com.vinot.parkd.R;
 
-public class MainActivity extends AppCompatActivity implements NfcDialogFragment.NfcDialogListener {
+import com.tpor9095.library.activities.BaseActivity;
 
-    private static String TAG = "MainActivity";
+public class MainActivity extends BaseActivity implements NfcDialogFragment.NfcDialogListener {
+
     private NfcAdapter mNfcAdapter;
     private Snackbar mNfcDisabledSnackbar;
     private Intent mNfcSettingsIntent;

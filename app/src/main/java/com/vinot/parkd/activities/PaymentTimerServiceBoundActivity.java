@@ -1,7 +1,7 @@
 package com.vinot.parkd.activities;
 
 import com.vinot.parkd.services.PaymentTimerService;
-import com.vinot.library.activities.ServiceBoundActivity;
+import com.tpor9095.library.activities.ServiceBoundActivity;
 
 /**
  * To be extended for automatic binding to PaymentTimerService

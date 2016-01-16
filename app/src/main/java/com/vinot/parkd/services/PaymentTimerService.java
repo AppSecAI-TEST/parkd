@@ -2,7 +2,6 @@ package com.vinot.parkd.services;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.media.RingtoneManager;
@@ -15,14 +14,13 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.orhanobut.hawk.Hawk;
+import com.tpor9095.library.services.BaseService;
 import com.vinot.parkd.Location;
 import com.vinot.parkd.activities.LocationActivity;
 import com.vinot.parkd.R;
 import com.vinot.parkd.activities.TimerActivity;
 
-public class PaymentTimerService extends Service {
-
-    private static final String TAG = "PaymentTimerService";
+public class PaymentTimerService extends BaseService {
 
     public static final String ACTION_PAYMENT_FAIL = "com.vinot.parkd.services.PaymentTimerService.ACTION_PAYMENT_FAIL";
     public static final String ACTION_PAYMENT_SUCCESS = "com.vinot.parkd.services.PaymentTimerService.ACTION_PAYMENT_SUCCESS";

@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.tpor9095.library.services.BaseService;
+
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -15,9 +17,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 
-public class PostRequesterService extends Service {
-
-    private static final String TAG = PostRequesterService.class.getSimpleName();
+public class PostRequesterService extends BaseService {
 
     public static final String ACTION_POST_COMPLETED = PostRequesterService.class.getCanonicalName() + ".ACTION_POST_COMPLETED";
     public static final String EXTRA_SUCCESS = PostRequesterService.class.getCanonicalName() + ".EXTRA_SUCCESS";
