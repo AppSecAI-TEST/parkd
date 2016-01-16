@@ -89,12 +89,12 @@ public class LoginActivity extends BroadcastAwareSessionServiceBoundActivity {
     }
 
     @Override
-    protected IntentFilter getIntentFilter() {
+    public IntentFilter getIntentFilter() {
         return new IntentFilter(SessionService.ACTION_LOGIN);
     }
 
     @Override
-    protected void onBroadcastReceived(Context context, Intent intent) {
+    public void onBroadcastReceived(Context context, Intent intent) {
         if (isBoundToService()) {
             if (intent.getBooleanExtra(SessionService.EXTRA_LOGIN_SUCCESS, false)) {
                 startActivity(mMainActivityIntent);

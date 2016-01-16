@@ -12,6 +12,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.orhanobut.hawk.Hawk;
 import com.vinot.parkd.Location;
 import com.vinot.parkd.R;
+import com.tpor9095.library.services.BroadcastAwareService;
 
 import java.util.LinkedHashMap;
 
@@ -33,7 +34,7 @@ public class SessionService extends BroadcastAwareService {
      * the PostRequesterService.ACTION_POST_COMPLETED intent.
      */
     @Override
-    protected void onBroadcastReceived(Context context, Intent intent) {
+    public void onBroadcastReceived(Context context, Intent intent) {
 
         boolean success;
         if (mLoggingIn) {
@@ -52,7 +53,7 @@ public class SessionService extends BroadcastAwareService {
     }
 
     @Override
-    protected IntentFilter getIntentFilter() {
+    public IntentFilter getIntentFilter() {
         return new IntentFilter(PostRequesterService.ACTION_POST_COMPLETED);
     }
 
