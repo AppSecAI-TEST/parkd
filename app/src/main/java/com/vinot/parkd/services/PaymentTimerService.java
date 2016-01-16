@@ -204,8 +204,10 @@ public class PaymentTimerService extends Service {
         private Notification getOngoingNotification(boolean finishing) {
             if (finishing) {
                 return mNotificationBuilder
+                        .setDefaults(Notification.DEFAULT_ALL)
                         .setProgress(100, 100, false)
                         .setContentText("Time's up!")
+                        .setAutoCancel(true)
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .build();
             }
