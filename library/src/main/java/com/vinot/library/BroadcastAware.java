@@ -1,4 +1,4 @@
-package com.vinot.parkd;
+package com.vinot.library;
 
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;

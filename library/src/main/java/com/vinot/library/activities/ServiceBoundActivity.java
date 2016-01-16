@@ -1,4 +1,4 @@
-package com.vinot.parkd.activities;
+package com.vinot.library.activities;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +12,10 @@ import android.util.Log;
 
 /**
  * To be extended for automatic binding to a Service.
+ * This class allows for binding to one Service via a Binder object.  Binding will be onStart and
+ * unbinding onStop.
+ * Generally this class is to be extended by another abstract class to implement those methods
+ * required to specify the Service being bound to.
  */
 public abstract class ServiceBoundActivity extends AppCompatActivity {
 
@@ -20,15 +24,15 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
     private boolean mBoundToService = false;
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        bindService();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TAG = this.getLocalClassName();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService();
     }
 
     @Override
@@ -70,7 +74,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
     /**
      * Wrapper around ContextWrapper.bindService to bind automatically to the Service we are supposed
      * to be bound to.
-     * @return boolean that ContextWrapper.bindService returns
+     * @return same boolean that ContextWrapper.bindService returns
      */
     protected boolean bindService() {
         return bindService(new Intent(this, getBoundServiceClass()), mServiceConnection, Context.BIND_AUTO_CREATE);
@@ -93,7 +97,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity {
 
     /**
      * Is Activity bound?
-     * @return if Activity is bound
+     * @return whether or not Activity is bound
      */
     protected final boolean isBoundToService() {
         return mBoundToService;

@@ -1,50 +1,44 @@
-package com.vinot.parkd.services;
+package com.vinot.library.activities;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.vinot.parkd.BroadcastAware;
+import com.vinot.library.BroadcastAware;
 
-public abstract class BroadcastAwareService extends Service implements BroadcastAware {
+/**
+ * To be extended for automatic awareness of local broadcasts.
+ * Broadcast registration occurs onStart, deregistration onStop.  This is a good way to
+ * programmatically register and deregister ServiceBoundActivities from local broadcasts
+ */
+public abstract class BroadcastAwareServiceBoundActivity extends ServiceBoundActivity
+        implements BroadcastAware {
 
-    // todo think about where broadcastDeregistration belongs; in onUnbind or in onDestroy.
-
-    protected static String TAG;
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            BroadcastAwareService.this.onBroadcastReceived(context, intent);
+            BroadcastAwareServiceBoundActivity.this.onBroadcastReceived(context, intent);
         }
     };
-    private IntentFilter mIntentFilter;
+    private IntentFilter mIntentFilter = getIntentFilter();
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        TAG = this.getClass().getSimpleName();
-        mIntentFilter = getIntentFilter();
+    protected void onStart() {
+        super.onStart();
         broadcastRegistration(mIntentFilter, mBroadcastReceiver);
     }
 
     @Override
-    public void onDestroy() {
+    protected void onStop() {
         if (mBroadcastReceiver != null) broadcastDeregistration(mBroadcastReceiver);
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        if (mBroadcastReceiver != null) broadcastDeregistration(mBroadcastReceiver);
-        return super.onUnbind(intent);
+        super.onStop();
     }
 
     @Override
     public void broadcastRegistration(IntentFilter intentFilter, BroadcastReceiver broadcastReceiver) {
-        LocalBroadcastManager.getInstance(BroadcastAwareService.this).registerReceiver(broadcastReceiver, intentFilter);
+        LocalBroadcastManager.getInstance(BroadcastAwareServiceBoundActivity.this).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
@@ -53,7 +47,10 @@ public abstract class BroadcastAwareService extends Service implements Broadcast
     }
 
     protected abstract void onBroadcastReceived(Context context, Intent intent);
+
+    /**
+     * Used to specify those Intents you wish to filter for in local broadcasting
+     * @return the IntentFilter used for broadcast filtering.
+     */
     protected abstract IntentFilter getIntentFilter();
 }
-
-
