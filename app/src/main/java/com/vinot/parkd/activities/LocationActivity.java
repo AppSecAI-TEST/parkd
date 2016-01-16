@@ -83,6 +83,7 @@ public class LocationActivity extends SessionServiceBoundActivity implements OnM
                     Log.d(TAG, "Successfully restored from local storage.");
                 } else {
                     // todo use default location or ask user to scan a tag
+                    // This branch will not be accessible for the first alpha release.
                 }
             } catch (Exception e) {
                 Log.wtf(TAG, e);

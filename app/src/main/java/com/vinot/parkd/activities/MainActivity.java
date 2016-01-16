@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.vinot.parkd.R;
 
 public class MainActivity extends AppCompatActivity implements NfcDialogFragment.NfcDialogListener {
 
+    private static String TAG = "MainActivity";
     private NfcAdapter mNfcAdapter;
     private Snackbar mNfcDisabledSnackbar;
     private Intent mNfcSettingsIntent;
@@ -86,7 +88,15 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
             case R.id.action_settings:
                 return true;
             case R.id.action_map:
-                startActivity(new Intent(MainActivity.this, LocationActivity.class));
+                if (Hawk.isBuilt()) {
+                    if (Hawk.get(getString(R.string.hawk_location), null) != null) {
+                        startActivity(new Intent(MainActivity.this, LocationActivity.class));
+                    } else {
+                        // invite the user to scan
+                    }
+                } else {
+                    Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
+                }
                 return true;
             case R.id.action_bump:
                 return true;
