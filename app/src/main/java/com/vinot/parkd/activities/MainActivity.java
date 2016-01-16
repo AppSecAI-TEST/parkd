@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,9 +20,11 @@ import com.vinot.parkd.R;
 
 public class MainActivity extends AppCompatActivity implements NfcDialogFragment.NfcDialogListener {
 
+    private static String TAG = "MainActivity";
     private NfcAdapter mNfcAdapter;
     private Snackbar mNfcDisabledSnackbar;
     private Intent mNfcSettingsIntent;
+    private Menu mMenu;
     private boolean mIsReturningFromSettings = false;
 
     @Override
@@ -64,6 +67,14 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     }
 
     @Override
+    protected void onStart() {
+        if (mMenu != null) {
+            onPrepareOptionsMenu(mMenu);
+        }
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (mIsReturningFromSettings) {
@@ -75,8 +86,21 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (Hawk.isBuilt()) {
+            menu.findItem(R.id.action_map).setVisible(
+                    Hawk.get(getString(R.string.hawk_location), null) != null
+            );
+        } else {
+            Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -92,6 +116,9 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
                 return true;
             case R.id.action_clear_data:
                 Hawk.clear();
+                if (mMenu != null) {
+                    onPrepareOptionsMenu(mMenu);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

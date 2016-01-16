@@ -10,6 +10,13 @@ package com.vinot.parkd;
 public interface LocallyRestoreable {
 
     /**
+     * Is there something to be restored?  Perhaps those objects which me might draw from storage
+     * are in fact null
+     * @return whether or not objects we are trying to draw from storage are null
+     */
+    boolean thereIsSomethingToBeRestored() throws Exception;
+
+    /**
      * Restore the state of a component from local storage.
      */
     void restoreStateFromLocal() throws Exception;
