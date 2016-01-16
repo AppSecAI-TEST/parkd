@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     private NfcAdapter mNfcAdapter;
     private Snackbar mNfcDisabledSnackbar;
     private Intent mNfcSettingsIntent;
+    private Menu mMenu;
     private boolean mIsReturningFromSettings = false;
 
     @Override
@@ -66,6 +67,14 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     }
 
     @Override
+    protected void onStart() {
+        if (mMenu != null) {
+            onPrepareOptionsMenu(mMenu);
+        }
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (mIsReturningFromSettings) {
@@ -77,8 +86,21 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (Hawk.isBuilt()) {
+            menu.findItem(R.id.action_map).setVisible(
+                    Hawk.get(getString(R.string.hawk_location), null) != null
+            );
+        } else {
+            Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -88,20 +110,15 @@ public class MainActivity extends AppCompatActivity implements NfcDialogFragment
             case R.id.action_settings:
                 return true;
             case R.id.action_map:
-                if (Hawk.isBuilt()) {
-                    if (Hawk.get(getString(R.string.hawk_location), null) != null) {
-                        startActivity(new Intent(MainActivity.this, LocationActivity.class));
-                    } else {
-                        // invite the user to scan
-                    }
-                } else {
-                    Log.wtf(TAG, new Exception(getString(R.string.hawk_not_built)));
-                }
+                startActivity(new Intent(MainActivity.this, LocationActivity.class));
                 return true;
             case R.id.action_bump:
                 return true;
             case R.id.action_clear_data:
                 Hawk.clear();
+                if (mMenu != null) {
+                    onPrepareOptionsMenu(mMenu);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
